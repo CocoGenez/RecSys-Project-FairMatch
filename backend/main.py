@@ -1,13 +1,23 @@
-from fastapi import FastAPI, UploadFile, Form, File, HTTPException
-from typing import List, Dict, Any
+from fastapi import FastAPI, UploadFile, Form, File, HTTPException, Depends
+from sqlalchemy.orm import Session
+from typing import Dict, Any
 import random
-from lib.gemini_parser import parse_resume_with_gemini
 import fitz  # PyMuPDF
+
+# Import your new DB modules
+from lib.gemini_parser import parse_resume_with_gemini
+from lib.database import engine, get_db, Base
+from lib.models import User
+
+# Create tables automatically (for dev/POC)
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="FairMatch API")
 
 app = FastAPI(
     title="FairMatch API",
-    description="Backend API for mock recommendations (Week 2 deliverable).",
-    version="1.0",
+    description="Backend API",
+    version="0.02",
 )
 
 # -------------------------
@@ -96,13 +106,14 @@ async def parse_resume(
     file: UploadFile = File(...),
     name: str = Form(...),
     gender: str = Form(...),
-    interested_domain: str = Form(...)
+    interested_domain: str = Form(...),
+    db: Session = Depends(get_db)  # Inject Database Session
 ):
     # 1. Validate File
     if file.content_type != "application/pdf":
         raise HTTPException(status_code=400, detail="File must be a PDF")
     
-    # 2. Extract Text (PyMuPDF)
+    # 2. Extract Text
     try:
         pdf_bytes = await file.read()
         doc = fitz.open(stream=pdf_bytes, filetype="pdf")
@@ -116,13 +127,26 @@ async def parse_resume(
     if not parsed_data:
         raise HTTPException(status_code=500, detail="AI parsing failed")
 
-    # 4. Construct Final Profile
-    full_profile = {
-        "Name": name,
-        "Gender": gender,
-        "Interested_Domain": interested_domain,
-        # Spread the parsed data fields
-        **parsed_data 
-    }
+    # 4. Save to PostgreSQL
+    new_user = User(
+        name=name,
+        gender=gender,
+        interested_domain=interested_domain,
+        age=parsed_data.get("Age"),
+        projects=parsed_data.get("Projects"),
+        future_career=parsed_data.get("Future_Career"),
+        python_level=parsed_data.get("Python_Level"),
+        sql_level=parsed_data.get("SQL_Level"),
+        java_level=parsed_data.get("Java_Level")
+    )
     
-    return full_profile
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)  # Get the generated ID
+    
+    # 5. Return the saved profile (with ID)
+    return {
+        "status": "success",
+        "user_id": new_user.id,
+        "data": parsed_data
+    }
