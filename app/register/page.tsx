@@ -4,14 +4,22 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { motion } from 'framer-motion'
-import { Mail, Lock, Sparkles, Briefcase, UserSearch, Home } from 'lucide-react'
+import { Mail, Lock, Sparkles, Briefcase, UserSearch, Home, Upload, User, Heart } from 'lucide-react'
 import Link from 'next/link'
+import { uploadResume } from '@/lib/api'
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [role, setRole] = useState<'recruiter' | 'jobseeker' | null>(null)
+  
+  // New fields for Job Seeker
+  const [name, setName] = useState('')
+  const [gender, setGender] = useState('')
+  const [interestedDomain, setInterestedDomain] = useState('')
+  const [resumeFile, setResumeFile] = useState<File | null>(null)
+
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { register } = useAuth()
@@ -36,25 +44,55 @@ export default function RegisterPage() {
       return
     }
 
+    if (role === 'jobseeker') {
+      if (!name || !gender || !interestedDomain || !resumeFile) {
+        setError('Veuillez remplir tous les champs et télécharger votre CV')
+        return
+      }
+    }
+
     setLoading(true)
 
-    const success = await register(email, password, role)
-    
-    if (success) {
+    try {
+      // 1. Register in local auth (mock)
+      const success = await register(email, password, role)
+      
+      if (!success) {
+        throw new Error('Cet email est déjà utilisé')
+      }
+
+      // 2. If Job Seeker, upload resume to backend
+      if (role === 'jobseeker' && resumeFile) {
+        const formData = new FormData()
+        formData.append('file', resumeFile)
+        formData.append('name', name)
+        formData.append('gender', gender)
+        formData.append('interested_domain', interestedDomain)
+
+        const response = await uploadResume(formData)
+        
+        // Store backend ID in localStorage for later use
+        const user = JSON.parse(localStorage.getItem('user') || '{}')
+        user.backendId = response.user_id
+        localStorage.setItem('user', JSON.stringify(user))
+      }
+
+      // 3. Redirect
       if (role === 'recruiter') {
         router.push('/recruiter/swipe')
       } else {
         router.push('/jobseeker/swipe')
       }
-    } else {
-      setError('Cet email est déjà utilisé')
+
+    } catch (err: any) {
+      setError(err.message || 'Une erreur est survenue')
+    } finally {
+      setLoading(false)
     }
-    
-    setLoading(false)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 py-12">
       {/* Bouton retour à l'accueil */}
       <motion.button
         initial={{ opacity: 0, x: -20 }}
@@ -141,6 +179,70 @@ export default function RegisterPage() {
                 </motion.div>
               </div>
             </motion.div>
+
+            {/* Champs supplémentaires pour Candidat */}
+            {role === 'jobseeker' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                className="space-y-4 border-l-2 border-pink-200 pl-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none"
+                      placeholder="Jean Dupont"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Genre</label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none bg-white"
+                  >
+                    <option value="">Sélectionner...</option>
+                    <option value="Male">Homme</option>
+                    <option value="Female">Femme</option>
+                    <option value="Other">Autre</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Domaine d'intérêt</label>
+                  <div className="relative">
+                    <Heart className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      value={interestedDomain}
+                      onChange={(e) => setInterestedDomain(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none"
+                      placeholder="Data Science, Web Dev..."
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">CV (PDF)</label>
+                  <div className="relative">
+                    <Upload className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100"
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -244,3 +346,4 @@ export default function RegisterPage() {
     </div>
   )
 }
+

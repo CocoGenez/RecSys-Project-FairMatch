@@ -7,60 +7,42 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { X, Heart, LogOut, Plus, List } from 'lucide-react'
 import JobModal from '@/components/modals/JobModal'
 import JobSwipeCard from '@/components/cards/JobSwipeCard'
-import { getJobs, getLikedItems, getPassedItems } from '@/lib/backend'
-import { createSwipe } from '@/lib/backend'
-import { JobOffer } from '@/lib/types'
+import { JobOffer as JobOfferType } from '@/lib/types'
+import { useRecommendations } from '@/hooks/useRecommendations'
+import { useSwipe } from '@/hooks/useSwipe'
 
 export default function JobseekerSwipePage() {
   const router = useRouter()
   const { user, logout } = useAuth()
-  const [jobs, setJobs] = useState<JobOffer[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isAnimating, setIsAnimating] = useState(false)
-  const [selectedJob, setSelectedJob] = useState<JobOffer | null>(null)
+  const { items } = useRecommendations()
+  const { isAnimating, handleSwipe, currentItems, currentIndex } = useSwipe(items)
+  
+  console.log("SwipePage render:", { 
+    totalItems: items.length, 
+    currentItemsLength: currentItems.length, 
+    currentIndex
+  })
+
+  const [selectedJob, setSelectedJob] = useState<JobOfferType | null>(null)
+
   const [isJobModalOpen, setIsJobModalOpen] = useState(false)
 
-  useEffect(() => {
-    if (!user) {
-      router.push('/login')
-      return
-    }
-    if (user.role !== 'jobseeker') {
-      router.push('/')
-      return
-    }
+  // Adapt items (from lib/data) to JobOfferType (from lib/types) for the card/modal
+  const adaptedCurrentJobs: JobOfferType[] = currentItems.map((item: any) => ({
+    id: item.id,
+    recruiterId: '0', // Mock
+    title: item.title,
+    company: item.company,
+    location: item.location,
+    objectives: item.description, // Map description to objectives
+    startDate: 'Dès que possible',
+    requiredQualities: item.requiredSkills || [], // Map skills to qualities
+    descriptionType: 'text',
+    description: item.description,
+    createdAt: Date.now()
+  }))
 
-    const liked = getLikedItems(user.id, 'job')
-    const passed = getPassedItems(user.id, 'job')
-    const allJobs = getJobs()
-    const available = allJobs.filter(
-      j => !liked.includes(j.id) && !passed.includes(j.id)
-    )
-    setJobs(available)
-  }, [user, router])
-
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (isAnimating || currentIndex >= jobs.length) return
-
-    setIsAnimating(true)
-    const currentJob = jobs[currentIndex]
-
-    if (user && currentJob) {
-      createSwipe({
-        userId: user.id,
-        itemId: currentJob.id,
-        type: 'job',
-        action: direction === 'right' ? 'like' : 'pass',
-      })
-    }
-
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1)
-      setIsAnimating(false)
-    }, 300)
-  }
-
-  const handleJobClick = (job: JobOffer) => {
+  const handleJobClick = (job: JobOfferType) => {
     setSelectedJob(job)
     setIsJobModalOpen(true)
   }
@@ -69,8 +51,6 @@ export default function JobseekerSwipePage() {
     logout()
     router.replace('/')
   }
-
-  const currentJobs = jobs.slice(currentIndex, currentIndex + 3)
 
   if (!user || user.role !== 'jobseeker') {
     return null
@@ -122,7 +102,7 @@ export default function JobseekerSwipePage() {
 
         {/* Zone de swipe */}
         <div className="relative h-[600px] mb-6 flex items-center justify-center">
-          {currentJobs.length === 0 ? (
+          {adaptedCurrentJobs.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -138,7 +118,7 @@ export default function JobseekerSwipePage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => router.push('/jobseeker/my-jobs')}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
+                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold shadow-lg"
                 >
                   Voir mes offres retenues
                 </motion.button>
@@ -146,7 +126,7 @@ export default function JobseekerSwipePage() {
             </motion.div>
           ) : (
             <AnimatePresence>
-              {currentJobs.map((job, index) => (
+              {adaptedCurrentJobs.map((job, index) => (
                 <JobSwipeCard
                   key={job.id}
                   job={job}
@@ -160,7 +140,7 @@ export default function JobseekerSwipePage() {
         </div>
 
         {/* Boutons d'action */}
-        {currentJobs.length > 0 && (
+        {adaptedCurrentJobs.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -197,4 +177,5 @@ export default function JobseekerSwipePage() {
     </div>
   )
 }
+
 

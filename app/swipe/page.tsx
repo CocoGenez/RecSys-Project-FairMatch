@@ -1,73 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Heart, LogOut, List } from 'lucide-react'
 import SwipeCard from '@/components/SwipeCard'
-import { mockCandidates, mockJobOffers, Candidate, JobOffer } from '@/lib/data'
-import { saveSwipe, getLikedItems, getPassedItems, hasSwiped } from '@/lib/swipes'
+import { Candidate, JobOffer } from '@/lib/data'
+import { useRecommendations } from '@/hooks/useRecommendations'
+import { useSwipe } from '@/hooks/useSwipe'
 
 export default function SwipePage() {
   const router = useRouter()
-  const { user, logout } = useAuth()
-  const [items, setItems] = useState<(Candidate | JobOffer)[]>([])
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [isAnimating, setIsAnimating] = useState(false)
-
-  useEffect(() => {
-    if (!user) {
-      router.push('/login')
-      return
-    }
-    if (!user.role) {
-      router.push('/select-role')
-      return
-    }
-
-    // Charger les items selon le rôle
-    if (user.role === 'recruiter') {
-      const liked = getLikedItems(user.id, 'candidate')
-      const passed = getPassedItems(user.id, 'candidate')
-      const available = mockCandidates.filter(
-        c => !liked.includes(c.id) && !passed.includes(c.id)
-      )
-      setItems(available)
-    } else {
-      const liked = getLikedItems(user.id, 'job')
-      const passed = getPassedItems(user.id, 'job')
-      const available = mockJobOffers.filter(
-        j => !liked.includes(j.id) && !passed.includes(j.id)
-      )
-      setItems(available)
-    }
-  }, [user, router])
-
-  const handleSwipe = (direction: 'left' | 'right') => {
-    if (isAnimating || currentIndex >= items.length) return
-
-    setIsAnimating(true)
-    const currentItem = items[currentIndex]
-
-    if (user && currentItem) {
-      const itemType = user.role === 'recruiter' ? 'candidate' : 'job'
-      const action = direction === 'right' ? 'like' : 'pass'
-      saveSwipe(user.id, currentItem.id, itemType, action)
-    }
-
-    setTimeout(() => {
-      setCurrentIndex(prev => prev + 1)
-      setIsAnimating(false)
-    }, 300)
-  }
+  const { logout } = useAuth()
+  const { items, user } = useRecommendations()
+  const { isAnimating, handleSwipe, currentItems } = useSwipe(items)
 
   const handleLogout = () => {
     logout()
     router.replace('/')
   }
-
-  const currentItems = items.slice(currentIndex, currentIndex + 3)
 
   if (!user || !user.role) {
     return null
@@ -175,6 +126,7 @@ export default function SwipePage() {
     </div>
   )
 }
+
 
 
 

@@ -20,3 +20,13 @@ class User(Base):
     python_level = Column(String)
     sql_level = Column(String)
     java_level = Column(String)
+
+class Interaction(Base):
+    __tablename__ = "interactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True)
+    item_id = Column(String) # Job ID or Candidate ID
+    type = Column(String) # "job" or "candidate"
+    action = Column(String) # "like" or "pass"
+    timestamp = Column(String) # ISO format string for simplicity

@@ -1,0 +1,42 @@
+MOCK_JOBS = [
+    {
+        "job_id": 101,
+        "title": "Junior Data Scientist",
+        "company": "TechNova",
+        "location": "Paris, France",
+        "salary_range": "40–50k",
+        "skills": ["Python", "Pandas", "Machine Learning"],
+    },
+    {
+        "job_id": 87,
+        "title": "Backend Developer",
+        "company": "SoftBridge",
+        "location": "Lyon, France",
+        "salary_range": "38–48k",
+        "skills": ["Python", "FastAPI", "PostgreSQL"],
+    },
+    {
+        "job_id": 203,
+        "title": "Machine Learning Intern",
+        "company": "InnovaLab",
+        "location": "Remote",
+        "salary_range": "Internship",
+        "skills": ["Python", "Scikit-learn", "Git"],
+    },
+    {
+        "job_id": 56,
+        "title": "Cloud Engineer (Entry Level)",
+        "company": "SkyNetix",
+        "location": "Marseille, France",
+        "salary_range": "42–52k",
+        "skills": ["AWS", "Docker", "Linux"],
+    },
+    {
+        "job_id": 149,
+        "title": "AI Research Assistant",
+        "company": "DeepVision",
+        "location": "Nice, France",
+        "salary_range": "45–55k",
+        "skills": ["PyTorch", "Deep Learning", "NLP"],
+    },
+]
