@@ -20,6 +20,17 @@ app = FastAPI(
     version="0.02",
 )
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    # In production, replace "*" with your actual Vercel URL
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # -------------------------
 # Root endpoint (healthcheck)
 # -------------------------
