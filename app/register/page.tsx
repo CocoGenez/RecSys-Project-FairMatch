@@ -44,7 +44,7 @@ export default function RegisterPage() {
       if (role === 'recruiter') {
         router.push('/recruiter/swipe')
       } else {
-        router.push('/jobseeker/swipe')
+        router.push('/jobseeker/upload-cv')
       }
     } else {
       setError('Cet email est déjà utilisé')

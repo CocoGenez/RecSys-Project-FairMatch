@@ -11,7 +11,7 @@ load_dotenv()
 # Format: postgresql://USER:PASSWORD@HOST:PORT/DB_NAME
 # Example: postgresql://postgres:password@localhost:5432/fairmatch
 # either you use the .env variable or default to local postgres
-DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/fairmatch")
+DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql://postgres:password@localhost:5432/postgres")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
