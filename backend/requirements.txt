@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic
+python-dotenv
+google-genai
+pymupdf
+python-multipart
+sqlalchemy 
+psycopg2-binary
+pandas
+pyarrow  # Pour lire les fichiers parquet
+torch  # Pour charger les embeddings .pt
+numpy
+duckdb
