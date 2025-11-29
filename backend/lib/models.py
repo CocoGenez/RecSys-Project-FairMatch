@@ -6,10 +6,15 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     
+    # Authentication fields
+    email = Column(String, unique=True, index=True, nullable=True)
+    password = Column(String, nullable=True)
+    role = Column(String, nullable=True)  # 'recruiter' or 'jobseeker'
+    
     # Manual Inputs
-    name = Column(String, index=True)
-    gender = Column(String)  # Protected attribute for Fairness
-    interested_domain = Column(String)
+    name = Column(String, index=True, nullable=True)
+    gender = Column(String, nullable=True)  # Protected attribute for Fairness
+    interested_domain = Column(String, nullable=True)
     
     # Parsed from Resume
     age = Column(Integer)
