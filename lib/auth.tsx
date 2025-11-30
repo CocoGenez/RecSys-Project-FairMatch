@@ -32,39 +32,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    const foundUser = users.find((u: any) => u.email === email && u.password === password)
-    
-    if (foundUser) {
-      const userData = { id: foundUser.id, email: foundUser.email, role: foundUser.role }
-      setUser(userData)
-      localStorage.setItem('user', JSON.stringify(userData))
-      return true
+    try {
+      const response = await fetch('http://localhost:8000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        // Handle errors like 404 Not Found or 401 Unauthorized
+        console.error('Login failed:', await response.text());
+        return false;
+      }
+
+      const loggedInUser = await response.json();
+      const userData = { id: loggedInUser.id.toString(), email: loggedInUser.email, role: loggedInUser.role };
+      
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      return true;
+
+    } catch (error) {
+      console.error('An error occurred during login:', error);
+      return false;
     }
-    return false
   }
 
-  const register = async (email: string, password: string, role?: 'recruiter' | 'jobseeker'): Promise<boolean> => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]')
-    
-    if (users.some((u: any) => u.email === email)) {
-      return false // Email déjà utilisé
-    }
+  const register = async (email: string, password: string, role: 'recruiter' | 'jobseeker' = 'jobseeker'): Promise<boolean> => {
+    try {
+      const response = await fetch('http://localhost:8000/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role }),
+      });
 
-    const newUser = {
-      id: Date.now().toString(),
-      email,
-      password,
-      role: role || undefined
-    }
+      if (!response.ok) {
+        // Handle errors like 409 Conflict (email already exists)
+        console.error('Registration failed:', await response.text());
+        return false;
+      }
 
-    users.push(newUser)
-    localStorage.setItem('users', JSON.stringify(users))
-    
-    const userData = { id: newUser.id, email: newUser.email, role: newUser.role }
-    setUser(userData)
-    localStorage.setItem('user', JSON.stringify(userData))
-    return true
+      const newUser = await response.json();
+      const userData = { id: newUser.id.toString(), email: newUser.email, role: newUser.role };
+
+      // Automatically log in the user after successful registration
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      return true;
+
+    } catch (error) {
+      console.error('An error occurred during registration:', error);
+      return false;
+    }
   }
 
   const logout = () => {
