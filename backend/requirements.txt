@@ -7,7 +7,3 @@ pymupdf
 python-multipart
 sqlalchemy 
 psycopg2-binary
-torch
-sentence-transformers
-pandas
-pyarrow

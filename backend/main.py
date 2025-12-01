@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from lib.database import engine, Base
 
-# Import routers
-from routers import recommendations, resume, interactions, auth
+# Import routers (recommendations moved to backend-ml service)
+from routers import resume, interactions, auth
 
 # Create tables automatically (for dev/POC)
 Base.metadata.create_all(bind=engine)
@@ -23,8 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(recommendations.router)
+# Include routers (recommendations in separate backend-ml service)
 app.include_router(resume.router)
 app.include_router(interactions.router)
 app.include_router(auth.router, prefix="/auth")
