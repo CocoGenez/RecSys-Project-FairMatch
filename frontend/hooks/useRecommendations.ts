@@ -34,23 +34,12 @@ export function useRecommendations() {
         console.log("Fetching jobseeker items for user:", user)
 
         try {
-          // Try to fetch from backend if user has a backendId
-          // We check localStorage explicitly because useAuth context might not be updated yet after register
-          let userId = (user as any).backendId
-          if (!userId) {
-            try {
-              const stored = localStorage.getItem('user')
-              if (stored) {
-                userId = JSON.parse(stored).backendId
-              }
-            } catch (e) {
-              // ignore json parse error
-            }
-          }
+          // Should work with this
+          const userId = user.id;
 
           if (userId && !isNaN(parseInt(userId))) {
-             console.log("Calling getRecommendations with ID:", userId)
-             const data = await getRecommendations(userId)
+             console.log("Calling getRecommendations (NEW) with ID:", userId)
+             const data = await getRecommendations(parseInt(userId))
              console.log("Got recommendations:", data)
              if (data && data.recommendations) {
 
@@ -61,7 +50,7 @@ export function useRecommendations() {
                  company: job.company,
                  location: job.location,
                  requiredSkills: job.skills,
-                 description: "Description du poste...", // Backend doesn't provide description yet
+                 description: job.description,
                  salary: job.salary_range,
                  logo: '💼'
                }))

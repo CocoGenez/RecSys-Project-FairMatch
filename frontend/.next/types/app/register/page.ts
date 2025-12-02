@@ -1,4 +1,4 @@
-// File: /Users/paulbusetta/Desktop/ING5/RecSys/RecSys-Project-FairMatch/frontend/app/register/page.tsx
+// File: C:\Code\RecSys-Project-FairMatch\frontend\app\register\page.tsx
 import * as entry from '../../../../app/register/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

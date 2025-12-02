@@ -1,4 +1,6 @@
-const API_URL = 'http://13.221.63.255:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+const ML_API_URL = process.env.NEXT_PUBLIC_ML_API_URL || 'http://localhost:8001';
 
 export async function uploadResume(formData: FormData) {
   const response = await fetch(`${API_URL}/api/parse-resume`, {
