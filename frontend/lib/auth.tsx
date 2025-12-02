@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:8000/auth/login', {
+      const response = await fetch('http://13.221.63.255:8000/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (email: string, password: string, role: 'recruiter' | 'jobseeker' = 'jobseeker'): Promise<boolean> => {
     try {
-      const response = await fetch('http://localhost:8000/auth/register', {
+      const response = await fetch('http://13.221.63.255:8000/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, role }),

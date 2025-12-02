@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://13.221.63.255:8000';
 
 export async function uploadResume(formData: FormData) {
   const response = await fetch(`${API_URL}/api/parse-resume`, {
