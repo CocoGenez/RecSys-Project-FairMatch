@@ -7,7 +7,6 @@ pymupdf
 python-multipart
 sqlalchemy 
 psycopg2-binary
-torch --index-url https://download.pytorch.org/whl/cpu
 sentence-transformers
 pandas
 pyarrow
