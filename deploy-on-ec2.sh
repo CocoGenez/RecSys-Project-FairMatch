@@ -10,8 +10,6 @@ echo -e "${GREEN}🚀 Déploiement du Backend FairMatch${NC}"
 echo ""
 
 # 1. Nettoyer l'ancien dossier si existe
-echo -e "${YELLOW}⚙️  Nettoyage et préparation...${NC}"
-cd ~
 if [ -d ~/RecSys-Project-FairMatch ]; then
     echo -e "${YELLOW}⚙️  Suppression de l'ancien dossier...${NC}"
     rm -rf ~/RecSys-Project-FairMatch
