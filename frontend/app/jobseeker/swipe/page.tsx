@@ -190,4 +190,4 @@ export default function JobseekerSwipePage() {
 
 
 
-// Force rebuild for HMR
+// Force rebuild for HMR - Swipe Card Updated

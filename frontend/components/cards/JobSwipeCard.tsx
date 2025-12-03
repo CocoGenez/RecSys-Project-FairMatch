@@ -118,6 +118,35 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
               )}
             </div>
           </div>
+
+          <div className="mb-4">
+            <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Benefits</h3>
+            <div className="flex flex-wrap gap-1.5 justify-center">
+              {job.benefits ? (
+                <>
+                  {job.benefits.split(',').slice(0, 4).map((benefit, idx) => {
+                    const cleanedBenefit = benefit.trim().replace(/^['"]|['"]$/g, '');
+                    if (!cleanedBenefit) return null;
+                    return (
+                      <span
+                        key={`benefit-${idx}`}
+                        className="px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium"
+                      >
+                        {cleanedBenefit}
+                      </span>
+                    );
+                  })}
+                  {job.benefits.split(',').length > 4 && (
+                    <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
+                      +{job.benefits.split(',').length - 4}
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-gray-500 text-xs">No benefits specified</span>
+              )}
+            </div>
+          </div>
           
         </div>
       </div>
