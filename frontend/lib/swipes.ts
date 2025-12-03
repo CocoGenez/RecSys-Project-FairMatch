@@ -8,6 +8,8 @@ export interface Swipe {
   timestamp: number
 }
 
+const STORAGE_KEY = 'fairmatch_swipes'
+
 export function saveSwipe(userId: string, itemId: string, type: 'candidate' | 'job', action: 'like' | 'pass') {
   const swipes = getSwipes()
   const swipe: Swipe = {
@@ -29,11 +31,11 @@ export function saveSwipe(userId: string, itemId: string, type: 'candidate' | 'j
     swipes.push(swipe)
   }
   
-  localStorage.setItem('swipes', JSON.stringify(swipes))
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(swipes))
 }
 
 export function getSwipes(): Swipe[] {
-  return JSON.parse(localStorage.getItem('swipes') || '[]')
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
 }
 
 export function getLikedItems(userId: string, type: 'candidate' | 'job'): string[] {

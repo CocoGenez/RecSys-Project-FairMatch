@@ -82,7 +82,15 @@ export function useRecommendations() {
                    skills: job.skills
                  };
                })
-               setItems(adaptedJobs)
+
+               // Filter out already swiped items
+               const liked = getLikedItems(user.id, 'job')
+               const passed = getPassedItems(user.id, 'job')
+               const filteredJobs = adaptedJobs.filter(
+                 job => !liked.includes(job.id) && !passed.includes(job.id)
+               )
+
+               setItems(filteredJobs)
                return
              }
           }

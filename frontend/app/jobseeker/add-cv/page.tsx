@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Save, FileText, User, Plus, X } from 'lucide-react'
-import { createCandidate } from '@/lib/backend'
+import { createCandidate, getCandidateByUserId } from '@/lib/backend'
 import { Candidate, Experience, Education, Language } from '@/lib/types'
 
 export default function AddCVPage() {
@@ -34,6 +34,32 @@ export default function AddCVPage() {
   const [currentCertification, setCurrentCertification] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (user) {
+      const existingCandidate = getCandidateByUserId(user.id)
+      if (existingCandidate) {
+        setFormData({
+          firstName: existingCandidate.firstName,
+          lastName: existingCandidate.lastName,
+          email: existingCandidate.email,
+          photo: existingCandidate.photo || '',
+          location: existingCandidate.location || '',
+          bio: existingCandidate.bio || '',
+          skills: existingCandidate.skills || [],
+          qualities: existingCandidate.qualities || [],
+          cvPdfUrl: existingCandidate.cvPdfUrl || '',
+          experiences: existingCandidate.cvFormData?.experiences || [],
+          education: existingCandidate.cvFormData?.education || [],
+          languages: existingCandidate.cvFormData?.languages || [],
+          certifications: existingCandidate.cvFormData?.certifications || [],
+        })
+        if (existingCandidate.cvType) {
+          setCvType(existingCandidate.cvType)
+        }
+      }
+    }
+  }, [user])
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
