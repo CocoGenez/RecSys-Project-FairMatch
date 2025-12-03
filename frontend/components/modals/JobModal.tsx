@@ -102,7 +102,21 @@ export default function JobModal({ job, isOpen, onClose }: JobModalProps) {
               {/* Benefits */}
               <div>
                  <h3 className="text-lg font-bold text-gray-800 mb-2">Benefits</h3>
-                 <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm">{job.benefits || 'Not specified'}</p>
+                 <div className="flex flex-wrap gap-2">
+                   {job.benefits ? (
+                     job.benefits.split(',').map((benefit, idx) => {
+                       const cleanedBenefit = benefit.trim().replace(/^['"]|['"]$/g, '');
+                       if (!cleanedBenefit) return null;
+                       return (
+                         <span key={`benefit-${idx}`} className="px-4 py-2 bg-green-100 text-green-700 rounded-full font-medium border border-green-200">
+                           {cleanedBenefit}
+                         </span>
+                       );
+                     })
+                   ) : (
+                     <span className="text-gray-500">Not specified</span>
+                   )}
+                 </div>
               </div>
             </div>
           </motion.div>
