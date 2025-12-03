@@ -85,12 +85,21 @@ def _rewrite_description_gemini(description, job_title, company=None, benefits=N
         )
         
         response = client.models.generate_content(model="gemini-2.5-flash-lite", contents=prompt)
+        result = response.text.strip() if response else description
+
         request_count += 1
         print(f"[Gemini] Request {request_count}/15 - {job_title}")
+<<<<<<< HEAD
         
         result = response.text.strip() if response else description
         return result.strip('"').strip("'")
         
+=======
+        print(f"  Original: {description[:100]}...")
+        print(f"  Rewritten: {result[:100]}...")
+        
+        return result
+>>>>>>> 38bb7d9435c0aab7201a248d5ad442a168c0b615
     except Exception as e:
         print(f"Gemini rewrite failed: {e}")
         return description
