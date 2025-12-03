@@ -41,7 +41,10 @@ async def parse_resume(
     # 4. Update Existing User in PostgreSQL
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
+        print(f"[DEBUG] User not found: id={user_id}")
         raise HTTPException(status_code=404, detail="User not found")
+    
+    print(f"[DEBUG] Updating user {user.id}: existing email={user.email}")
 
     # Update fields
     user.name = name

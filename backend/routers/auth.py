@@ -16,6 +16,7 @@ def register_user(user_create: schemas.UserCreate, db: Session = Depends(databas
     
     # Create new user
     # In a real app, you should hash the password
+    print(f"[DEBUG] Creating user: email={user_create.email}, role={user_create.role}")
     new_user = models.User(
         email=user_create.email,
         password=user_create.password, # Hashing is recommended!
@@ -25,6 +26,7 @@ def register_user(user_create: schemas.UserCreate, db: Session = Depends(databas
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    print(f"[DEBUG] User created: id={new_user.id}, email={new_user.email}")
     return new_user
 
 @router.post("/login", response_model=schemas.User)
