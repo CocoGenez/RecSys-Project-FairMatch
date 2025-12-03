@@ -39,38 +39,58 @@ def extract_min_experience(exp_str):
         pass
     return None
 
-def _rewrite_description_gemini(description, job_title):
-    """Use Gemini API to rewrite a job description for variety."""
+def _rewrite_description_gemini(description, job_title, company=None, benefits=None, responsibilities=None, company_profile=None):
+    """Use Gemini API to rewrite a job description using full context."""
     global request_count, last_reset_time
     try:
-        #api_key = os.getenv("GOOGLE_API_KEY")
-        api_key = "AIzaSyCqPnNNuxSAYVFflUJaB8rbbOTCyY4m7x8"
+        # Use your specific API Key here
+        api_key = "AIzaSyA9QZnBmVbU2N4oa055xMXbG32rn5WK1i4" 
+        
         if not api_key:
-            return description  # fallback if no key
-        # Rate limiting: check if we've hit 15 requests in the last 60 seconds
+            return description
+
+        # Rate limiting logic
         current_time = time.time()
         if current_time - last_reset_time >= RESET_INTERVAL:
             request_count = 0
             last_reset_time = current_time
         
-        # If we've made 15 requests, wait until reset
         if request_count >= REQUEST_LIMIT:
-            wait_time = RESET_INTERVAL - (current_time - last_reset_time) + 5  # +5s buffer
+            wait_time = RESET_INTERVAL - (current_time - last_reset_time) + 5
             print(f"[Rate Limit] Reached 15 requests. Waiting {wait_time:.1f}s...")
             time.sleep(wait_time)
             request_count = 0
             last_reset_time = time.time()
         
-        # Make the request
+        # Build a context string from available data
+        context_details = ""
+        if company and str(company).lower() != "nan":
+            context_details += f"Company Name: {company}\n"
+        if company_profile and str(company_profile).lower() != "nan":
+            context_details += f"About the Company: {company_profile}\n"
+        if responsibilities and str(responsibilities).lower() != "nan":
+            context_details += f"Key Responsibilities: {responsibilities}\n"
+        if benefits and str(benefits).lower() != "nan":
+            context_details += f"Key Benefits: {benefits}\n"
+
+        # Construct the Prompt
         client = genai.Client(api_key=api_key)
         prompt = (
-            f"Rewrite this job description for a {job_title} role in a different style "
-            f"(keep it concise, ~2-3 sentences). Keep the core meaning but vary the wording:\n\n{description}"
+            f"Act as a professional recruiter. Write a cohesive, concise job description (2-3 sentences) "
+            f"for a {job_title} role.\n\n"
+            f"Synthesize the following details into the description:\n"
+            f"{context_details}\n"
+            f"Original Draft: {description}\n\n"
+            f"IMPORTANT: Output ONLY the raw paragraph text. Do not output 'Here is the description' or quotes."
         )
+        
         response = client.models.generate_content(model="gemini-2.5-flash-lite", contents=prompt)
         request_count += 1
         print(f"[Gemini] Request {request_count}/15 - {job_title}")
-        return response.text.strip() if response else description
+        
+        result = response.text.strip() if response else description
+        return result.strip('"').strip("'")
+        
     except Exception as e:
         print(f"Gemini rewrite failed: {e}")
         return description
@@ -123,7 +143,7 @@ load_dotenv(env_path)
 
 # Verify API key is loaded
 # api_key = os.getenv("GOOGLE_API_KEY")
-api_key = "AIzaSyCqPnNNuxSAYVFflUJaB8rbbOTCyY4m7x8"
+api_key = "AIzaSyCPmvAz2qUYxrz3hmYLLdw_4GHe5t-fJn4"
 if not api_key:
     print("WARNING: GOOGLE_API_KEY not found in .env")
 else:
@@ -148,14 +168,27 @@ students_raw = kagglehub.dataset_load(
   students_path
 )
 
-jobs_raw = kagglehub.dataset_load(
-  KaggleDatasetAdapter.PANDAS,
-  "ravindrasinghrana/job-description-dataset",
-  jobs_path
+print("Downloading jobs dataset...")
+# 1. Download the raw files (returns a folder path)
+jobs_folder = kagglehub.dataset_download("ravindrasinghrana/job-description-dataset")
+
+# 2. Construct path to the actual CSV file
+# The file inside the zip is usually named 'job_descriptions.csv'
+csv_file_path = Path(jobs_folder) / "job_descriptions.csv"
+
+print(f"Reading CSV from: {csv_file_path}")
+
+# 3. Read manually with robust settings
+jobs_raw = pd.read_csv(
+    csv_file_path,
+    encoding="utf-8",       # Try utf-8 first for clean CSVs
+    on_bad_lines="skip",    # Skip corrupted lines
+    engine="python"         # Robust parser
 )
 
 print("Students shape:", students_raw.shape)
 print("Jobs shape:", jobs_raw.shape)
+
 
 # -------------------------
 # CLEAN STUDENTS
@@ -303,18 +336,26 @@ for job_title, group in jobs.groupby("job title"):
             # keep first copy as-is
             jobs_deduplicated.append(row)
         else:
-            # rewrite description + perturb skills for variety
             if "job description" in row:
+                c_val = row["company"] if "company" in row else ""
+                b_val = row["benefits"] if "benefits" in row else ""
+                r_val = row["responsibilities"] if "responsibilities" in row else ""
+                cp_val = row["company profile"] if "company profile" in row else ""
+
                 row["job description"] = _rewrite_description_gemini(
-                    row["job description"],
-                    row.get("job title", "Position")
+                    description=row["job description"],
+                    job_title=row.get("job title", "Position"),
+                    company=c_val,
+                    benefits=b_val,
+                    responsibilities=r_val,
+                    company_profile=cp_val
                 )
             if "skills" in row:
                 row["skills"] = _perturb_skills(row["skills"], drop_prob=0.15)
             jobs_deduplicated.append(row)
 
 jobs = pd.DataFrame(jobs_deduplicated).reset_index(drop=True)
-jobs = jobs.drop(columns=["content_hash"])
+jobs = jobs.drop(columns=["content_hash"], errors='ignore')
 
 print(f"After dedup & rewrite (50 per group): {len(jobs)} jobs")
 
