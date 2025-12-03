@@ -1,5 +1,6 @@
 import torch
 import pandas as pd
+import re
 from sentence_transformers import SentenceTransformer, util
 from pathlib import Path
 
@@ -14,9 +15,11 @@ try:
     jobs     = pd.read_parquet(processed_dir / "jobs_sample.parquet")
 
     print("Models loaded successfully.")
-    print("job_emb shape :", job_emb.shape)
-    print("jobs shape    :", jobs.shape)
-    print("jobs columns  :", jobs.columns.tolist())
+    if job_emb is not None:
+        print("job_emb shape :", job_emb.shape)
+    if jobs is not None:
+        print("jobs shape    :", jobs.shape)
+        print("jobs columns  :", jobs.columns.tolist())
 except Exception as e:
     print(f"WARNING: Could not load model artifacts: {e}")
     job_emb = None
@@ -29,6 +32,34 @@ try:
 except Exception as e:
     print(f"WARNING: Could not load SentenceTransformer: {e}")
     model = None
+
+
+def split_skills(val):
+    """
+    Robustly split skills string into a list.
+    Handles comma-separated values and space-separated sentences/capitalized words.
+    """
+    if not isinstance(val, str):
+        return []
+    val = val.strip()
+    if not val:
+        return []
+        
+    # 1. Try splitting by the specific pattern: lowercase/paren + space + Uppercase
+    # This handles the "merged sentences" issue (e.g. "development Security")
+    # Regex: Lookbehind for [a-z)] followed by space(s) followed by Lookahead for [A-Z]
+    parts = re.split(r'(?<=[a-z)])\s+(?=[A-Z])', val)
+    
+    final_skills = []
+    for p in parts:
+        # 2. For each part, also split by comma if present
+        if "," in p:
+            subs = [s.strip() for s in p.split(",") if s.strip()]
+            final_skills.extend(subs)
+        else:
+            final_skills.append(p.strip())
+            
+    return final_skills
 
 
 def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
@@ -79,7 +110,7 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
             "company": row.get("company", "Unknown Company"),
             "location": row.get("location", "Remote"),
             "country": row.get("country", "Unknown Country"),
-            "skills": row.get("skills", "").split(",") if isinstance(row.get("skills"), str) else [],
+            "skills": split_skills(row.get("skills", "")),
             "salary_range": row.get("salary_range", "Competitive"),
             "experience": row.get("experience", "Not specified"),
             "qualifications": row.get("qualifications", "Not specified"),
@@ -100,4 +131,3 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
 if __name__ == "__main__":
     test_text = "python developer machine learning sql data science"
     print(recommend_from_text(test_text))
-
