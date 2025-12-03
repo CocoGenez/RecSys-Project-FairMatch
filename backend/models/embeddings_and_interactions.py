@@ -11,7 +11,8 @@ students = pd.read_parquet(project_root / "students.parquet")
 jobs = pd.read_parquet(project_root / "jobs.parquet")
 
 # 2. GRAND SAMPLE : on prend 20 000 jobs pour garder de la diversité
-jobs_sample = jobs.sample(n=20000, random_state=42).reset_index(drop=True)
+sample_size = min(20000, len(jobs))
+jobs_sample = jobs.sample(n=sample_size, random_state=42).reset_index(drop=True)
 
 print("Students:", students.shape)
 print("Jobs sample (avant texte):", jobs_sample.shape)
@@ -21,10 +22,10 @@ def build_job_text(row):
     return (
         f"title {row.get('job title', '')}. "
         f"role {row.get('role', '')}. "
-        f"required skills {row.get('skills', '')}. "
-        f"responsibilities {row.get('responsibilities', '')}. "
+        f"skills {row.get('skills', '')}. "
         f"description {row.get('job description', '')}. "
-        f"company_size {row.get('company size', '')}."
+        f"responsibilities {row.get('responsibilities', '')}. "
+        f"about company {row.get('company profile', '')}. " 
     )
 
 jobs_sample["JobText"] = jobs_sample.apply(build_job_text, axis=1)
