@@ -88,14 +88,9 @@ export default function JobModal({ job, isOpen, onClose }: JobModalProps) {
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-3">Skills & Qualities</h3>
                 <div className="flex flex-wrap gap-2">
-                  {(job.skills || []).map((skill, idx) => (
+                  {Array.from(new Set([...(job.skills || []), ...(job.requiredQualities || [])])).map((skill, idx) => (
                     <span key={`skill-${idx}`} className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full font-medium border border-purple-200">
                       {skill}
-                    </span>
-                  ))}
-                  {(job.requiredQualities || []).map((quality, idx) => (
-                    <span key={`qual-${idx}`} className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-medium border border-blue-200">
-                      {quality}
                     </span>
                   ))}
                   {(!job.skills?.length && !job.requiredQualities?.length) && (
