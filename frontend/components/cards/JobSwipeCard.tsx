@@ -59,7 +59,7 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
       animate={{ scale: 1, y: 0 }}
       exit={{ scale: 0.5, opacity: 0, rotate: 45 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="absolute w-full max-w-sm h-[600px] cursor-grab active:cursor-grabbing border-4 border-red-500"
+      className="absolute w-full max-w-sm h-[600px] cursor-grab active:cursor-grabbing"
       onClick={handleCardClick}
     >
       <div className="bg-white rounded-3xl shadow-2xl h-full overflow-hidden border-2 border-gray-100 flex flex-col">
@@ -72,7 +72,7 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
         <div className="flex-1 p-6 flex flex-col">
           <div className="text-center mb-4">
             <h2 className="text-xl font-bold text-gray-800 mb-1 line-clamp-2">{job.title}</h2>
-            <p className="text-sm text-purple-600 font-medium mb-2">{job.role || 'Role non spécifié'}</p>
+            <p className="text-sm text-purple-600 font-medium mb-2">{job.role || 'Role not specified'}</p>
             
             <div className="flex flex-col gap-1 text-gray-600 text-sm mb-3">
               <div className="flex items-center justify-center gap-2">
@@ -81,9 +81,9 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
                 <span>{job.location} {job.country ? `(${job.country})` : ''}</span>
               </div>
               <div className="flex items-center justify-center gap-2 text-xs">
-                <span className="bg-gray-100 px-2 py-0.5 rounded">{job.workType || 'Temps plein'}</span>
-                <span className="bg-gray-100 px-2 py-0.5 rounded">{job.salaryRange || 'Salaire non spécifié'}</span>
-                <span className="bg-gray-100 px-2 py-0.5 rounded capitalize">{job.companyBucket || 'Taille inconnue'}</span>
+                <span className="bg-gray-100 px-2 py-0.5 rounded">{job.workType || 'Full-time'}</span>
+                <span className="bg-gray-100 px-2 py-0.5 rounded">{job.salaryRange || 'Salary not specified'}</span>
+                <span className="bg-gray-100 px-2 py-0.5 rounded capitalize">{job.companyBucket || 'Unknown size'}</span>
               </div>
               {job.companyProfile && (
                 <div className="text-xs text-gray-500 italic mt-1">
@@ -95,7 +95,7 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
           
           
           <div className="mb-4">
-            <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Qualités requises</h3>
+            <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Required Skills</h3>
             <div className="flex flex-wrap gap-1.5 justify-center">
               {(job.skills && job.skills.length > 0) || (job.requiredQualities && job.requiredQualities.length > 0) ? (
                 <>
@@ -114,13 +114,14 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
                   )}
                 </>
               ) : (
-                <span className="text-gray-500 text-xs">Aucune compétence spécifiée</span>
+                <span className="text-gray-500 text-xs">No skills specified</span>
               )}
             </div>
           </div>
           
         </div>
       </div>
+
       {/* Indicateurs de swipe */}
       <motion.div
         className="absolute top-4 left-4 p-3 bg-red-500 rounded-full shadow-lg"

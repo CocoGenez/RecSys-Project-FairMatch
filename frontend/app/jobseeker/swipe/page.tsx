@@ -76,7 +76,7 @@ export default function JobseekerSwipePage() {
           className="flex items-center justify-between mb-6"
         >
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Trouvez votre job
+            Find your job
           </h1>
           <div className="flex gap-2">
             <div className="flex items-center gap-1">
@@ -85,7 +85,7 @@ export default function JobseekerSwipePage() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => router.push('/jobseeker/my-jobs')}
                 className="p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
-                title="Mes offres retenues"
+                title="My saved jobs"
               >
                 <List className="w-5 h-5 text-purple-600" />
               </motion.button>
@@ -94,7 +94,7 @@ export default function JobseekerSwipePage() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => router.push('/jobseeker/add-cv')}
                 className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
-                title="Ajouter mon CV"
+                title="Add my CV"
               >
                 <Plus className="w-4 h-4" />
               </motion.button>
@@ -120,9 +120,9 @@ export default function JobseekerSwipePage() {
             >
               <div className="text-center p-8">
                 <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Plus d'offres !</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">No more offers!</h2>
                 <p className="text-gray-600 mb-6">
-                  Vous avez parcouru toutes les offres disponibles.
+                  You have browsed all available offers.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -130,7 +130,7 @@ export default function JobseekerSwipePage() {
                   onClick={() => router.push('/jobseeker/my-jobs')}
                   className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold shadow-lg"
                 >
-                  Voir mes offres retenues
+                  View my saved jobs
                 </motion.button>
               </div>
             </motion.div>
