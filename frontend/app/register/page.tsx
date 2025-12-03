@@ -63,8 +63,16 @@ export default function RegisterPage() {
 
       // 2. If Job Seeker, upload resume to backend
       if (role === 'jobseeker' && resumeFile) {
+        // Retrieve user_id from localStorage (set by register() above)
+        const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
+        
+        if (!storedUser.id) {
+           throw new Error('User ID not found after registration')
+        }
+
         const formData = new FormData()
         formData.append('file', resumeFile)
+        formData.append('user_id', storedUser.id)
         formData.append('name', name)
         formData.append('gender', gender)
         formData.append('interested_domain', interestedDomain)
