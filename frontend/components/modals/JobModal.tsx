@@ -57,39 +57,73 @@ export default function JobModal({ job, isOpen, onClose }: JobModalProps) {
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-purple-50 p-4 rounded-xl">
+                  <h3 className="font-semibold text-purple-900 mb-2">Détails du poste</h3>
+                  <ul className="space-y-2 text-sm text-purple-800">
+                    <li><span className="font-medium">Rôle:</span> {job.role || 'Non spécifié'}</li>
+                    <li><span className="font-medium">Type:</span> {job.workType || 'Non spécifié'}</li>
+                    <li><span className="font-medium">Expérience:</span> {job.experience || 'Non spécifié'}</li>
+                    <li><span className="font-medium">Salaire:</span> {job.salaryRange || 'Non spécifié'}</li>
+                  </ul>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-xl">
+                  <h3 className="font-semibold text-blue-900 mb-2">Entreprise</h3>
+                  <ul className="space-y-2 text-sm text-blue-800">
+                    <li><span className="font-medium">Taille:</span> {job.companyBucket || 'Non spécifié'}</li>
+                    <li><span className="font-medium">Secteur:</span> {job.companyProfile?.Sector || 'Non spécifié'}</li>
+                    <li><span className="font-medium">Industrie:</span> {job.companyProfile?.Industry || 'Non spécifié'}</li>
+                    <li><span className="font-medium">Localisation:</span> {job.location} {job.country ? `(${job.country})` : ''}</li>
+                  </ul>
+                </div>
+              </div>
               {/* Objectifs */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Target className="w-5 h-5 text-blue-600" />
                   <h3 className="text-xl font-bold text-gray-800">Objectifs de la mission</h3>
                 </div>
-                <p className="text-gray-700 leading-relaxed bg-blue-50 rounded-xl p-4">{job.objectives}</p>
+                <p className="text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-4">{job.objectives}</p>
               </div>
 
-              {/* Qualités requises */}
+              {/* Compétences & Qualités */}
               <div>
-                <h3 className="text-xl font-bold text-gray-800 mb-3">Qualités requises</h3>
+                <h3 className="text-xl font-bold text-gray-800 mb-3">Compétences & Qualités</h3>
                 <div className="flex flex-wrap gap-2">
-                  {job.requiredQualities && job.requiredQualities.length > 0 ? (
-                    job.requiredQualities.map((quality, idx) => (
-                      <span
-                        key={idx}
-                        className="px-4 py-2 bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 rounded-full font-medium"
-                      >
-                        {quality}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-gray-500">Aucune qualité spécifiée</span>
+                  {(job.skills || []).map((skill, idx) => (
+                    <span key={`skill-${idx}`} className="px-4 py-2 bg-purple-100 text-purple-700 rounded-full font-medium border border-purple-200">
+                      {skill}
+                    </span>
+                  ))}
+                  {(job.requiredQualities || []).map((quality, idx) => (
+                    <span key={`qual-${idx}`} className="px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-medium border border-blue-200">
+                      {quality}
+                    </span>
+                  ))}
+                  {(!job.skills?.length && !job.requiredQualities?.length) && (
+                    <span className="text-gray-500">Aucune compétence spécifiée</span>
                   )}
                 </div>
+              </div>
+
+              {/* Qualifications & Avantages */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">Qualifications</h3>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm">{job.qualifications || 'Non spécifié'}</p>
+                 </div>
+                 <div>
+                    <h3 className="text-lg font-bold text-gray-800 mb-2">Avantages</h3>
+                    <p className="text-gray-700 bg-gray-50 p-3 rounded-lg text-sm">{job.benefits || 'Non spécifié'}</p>
+                 </div>
               </div>
 
               {/* Description */}
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-3">Description du poste</h3>
                 {job.descriptionType === 'text' && job.description && (
-                  <div className="bg-gray-50 rounded-xl p-6">
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
                     <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">{job.description}</p>
                   </div>
                 )}

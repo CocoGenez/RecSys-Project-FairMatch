@@ -39,7 +39,17 @@ export default function JobseekerSwipePage() {
     requiredQualities: item.requiredSkills || [], // Map skills to qualities
     descriptionType: 'text',
     description: item.description,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    role: item.role,
+    country: item.country,
+    experience: item.experience,
+    qualifications: item.qualifications,
+    workType: item.work_type,
+    companyBucket: item.company_bucket,
+    benefits: item.benefits,
+    companyProfile: item.company_profile,
+    salaryRange: item.salary_range,
+    skills: item.skills
   }))
 
   const handleJobClick = (job: JobOfferType) => {

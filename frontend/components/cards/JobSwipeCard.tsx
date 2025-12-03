@@ -71,42 +71,56 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
         {/* Informations essentielles */}
         <div className="flex-1 p-6 flex flex-col">
           <div className="text-center mb-4">
-            <h2 className="text-xl font-bold text-gray-800 mb-2 line-clamp-2">{job.title}</h2>
-            <div className="flex items-center justify-center gap-2 text-gray-600 text-sm">
-              <span className="font-semibold">{job.company}</span>
-              <span>•</span>
-              <span>{job.location}</span>
+            <h2 className="text-xl font-bold text-gray-800 mb-1 line-clamp-2">{job.title}</h2>
+            <p className="text-sm text-purple-600 font-medium mb-2">{job.role || 'Role non spécifié'}</p>
+            
+            <div className="flex flex-col gap-1 text-gray-600 text-sm mb-3">
+              <div className="flex items-center justify-center gap-2">
+                <span className="font-semibold">{job.company}</span>
+                <span>•</span>
+                <span>{job.location} {job.country ? `(${job.country})` : ''}</span>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-xs">
+                <span className="bg-gray-100 px-2 py-0.5 rounded">{job.workType || 'Temps plein'}</span>
+                <span className="bg-gray-100 px-2 py-0.5 rounded">{job.salaryRange || 'Salaire non spécifié'}</span>
+                <span className="bg-gray-100 px-2 py-0.5 rounded capitalize">{job.companyBucket || 'Taille inconnue'}</span>
+              </div>
+              {job.companyProfile && (
+                <div className="text-xs text-gray-500 italic mt-1">
+                  {job.companyProfile.Sector} • {job.companyProfile.Industry}
+                </div>
+              )}
             </div>
           </div>
+          
           
           <div className="mb-4">
             <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Qualités requises</h3>
             <div className="flex flex-wrap gap-1.5 justify-center">
-              {job.requiredQualities && job.requiredQualities.length > 0 ? (
+              {(job.skills && job.skills.length > 0) || (job.requiredQualities && job.requiredQualities.length > 0) ? (
                 <>
-                  {job.requiredQualities.slice(0, 3).map((quality, idx) => (
+                  {(job.skills || job.requiredQualities).slice(0, 3).map((skill, idx) => (
                     <span
                       key={idx}
                       className="px-2.5 py-1 bg-gradient-to-r from-blue-100 to-cyan-100 text-blue-700 rounded-full text-xs font-medium"
                     >
-                      {quality}
+                      {skill}
                     </span>
                   ))}
-                  {job.requiredQualities.length > 3 && (
+                  {(job.skills || job.requiredQualities).length > 3 && (
                     <span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
-                      +{job.requiredQualities.length - 3}
+                      +{(job.skills || job.requiredQualities).length - 3}
                     </span>
                   )}
                 </>
               ) : (
-                <span className="text-gray-500 text-xs">Aucune qualité spécifiée</span>
+                <span className="text-gray-500 text-xs">Aucune compétence spécifiée</span>
               )}
             </div>
           </div>
           
         </div>
       </div>
-
       {/* Indicateurs de swipe */}
       <motion.div
         className="absolute top-4 left-4 p-3 bg-red-500 rounded-full shadow-lg"

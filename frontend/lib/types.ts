@@ -72,6 +72,16 @@ export interface JobOffer {
   documentName?: string
   externalLink?: string
   createdAt: number
+  role?: string
+  country?: string
+  experience?: string
+  qualifications?: string
+  workType?: string
+  companyBucket?: string
+  benefits?: string
+  companyProfile?: any
+  salaryRange?: string
+  skills?: string[]
 }
 
 export interface Swipe {
