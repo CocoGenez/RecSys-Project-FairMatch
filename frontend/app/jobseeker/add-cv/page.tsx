@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/auth'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Save, FileText, User, Plus, X } from 'lucide-react'
 import { createCandidate, getCandidateByUserId } from '@/lib/backend'
+import { getUserProfile } from '@/lib/api'
 import { Candidate, Experience, Education, Language } from '@/lib/types'
 
 export default function AddCVPage() {
@@ -36,29 +37,69 @@ export default function AddCVPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (user) {
-      const existingCandidate = getCandidateByUserId(user.id)
-      if (existingCandidate) {
-        setFormData({
-          firstName: existingCandidate.firstName,
-          lastName: existingCandidate.lastName,
-          email: existingCandidate.email,
-          photo: existingCandidate.photo || '',
-          location: existingCandidate.location || '',
-          bio: existingCandidate.bio || '',
-          skills: existingCandidate.skills || [],
-          qualities: existingCandidate.qualities || [],
-          cvPdfUrl: existingCandidate.cvPdfUrl || '',
-          experiences: existingCandidate.cvFormData?.experiences || [],
-          education: existingCandidate.cvFormData?.education || [],
-          languages: existingCandidate.cvFormData?.languages || [],
-          certifications: existingCandidate.cvFormData?.certifications || [],
-        })
-        if (existingCandidate.cvType) {
-          setCvType(existingCandidate.cvType)
+    const loadData = async () => {
+      if (user) {
+        // 1. Try loading from backend (Registration data)
+        try {
+          // Check if we have a backendId stored in localStorage (from registration)
+          // Note: The user object from useAuth might not have it directly if it was just updated in localStorage
+          const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const backendId = storedUser.backendId || (user as any).backendId;
+
+          if (backendId) {
+            const profile = await getUserProfile(parseInt(backendId));
+            console.log("Loaded profile from backend:", profile);
+            
+            // Map backend profile to form data
+            const names = (profile.name || '').split(' ');
+            const firstName = names[0] || '';
+            const lastName = names.slice(1).join(' ') || '';
+            
+            setFormData(prev => ({
+              ...prev,
+              firstName: firstName || prev.firstName,
+              lastName: lastName || prev.lastName,
+              email: profile.email || prev.email, // Should match auth email usually
+              bio: profile.interested_domain ? `Interested in: ${profile.interested_domain}` : prev.bio,
+              skills: [
+                ...(prev.skills || []),
+                profile.python_level ? `Python (${profile.python_level})` : null,
+                profile.sql_level ? `SQL (${profile.sql_level})` : null,
+                profile.java_level ? `Java (${profile.java_level})` : null
+              ].filter(Boolean) as string[],
+              // Add projects to description or experiences if needed
+            }));
+          }
+        } catch (e) {
+          console.error("Failed to load backend profile", e);
+        }
+
+        // 2. Load from local storage (Existing candidate data)
+        const existingCandidate = getCandidateByUserId(user.id)
+        if (existingCandidate) {
+          setFormData(prev => ({
+            ...prev,
+            firstName: existingCandidate.firstName || prev.firstName,
+            lastName: existingCandidate.lastName || prev.lastName,
+            email: existingCandidate.email || prev.email,
+            photo: existingCandidate.photo || prev.photo,
+            location: existingCandidate.location || prev.location,
+            bio: existingCandidate.bio || prev.bio,
+            skills: existingCandidate.skills && existingCandidate.skills.length > 0 ? existingCandidate.skills : prev.skills,
+            qualities: existingCandidate.qualities || prev.qualities,
+            cvPdfUrl: existingCandidate.cvPdfUrl || prev.cvPdfUrl,
+            experiences: existingCandidate.cvFormData?.experiences || prev.experiences,
+            education: existingCandidate.cvFormData?.education || prev.education,
+            languages: existingCandidate.cvFormData?.languages || prev.languages,
+            certifications: existingCandidate.cvFormData?.certifications || prev.certifications,
+          }))
+          if (existingCandidate.cvType) {
+            setCvType(existingCandidate.cvType)
+          }
         }
       }
     }
+    loadData();
   }, [user])
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

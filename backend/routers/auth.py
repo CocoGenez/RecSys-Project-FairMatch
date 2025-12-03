@@ -43,3 +43,13 @@ def login_user(user_credentials: schemas.UserLogin, db: Session = Depends(databa
             detail="Incorrect password",
         )
     return user
+
+@router.get("/api/users/{user_id}", response_model=schemas.User)
+def get_user(user_id: int, db: Session = Depends(database.get_db)):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return user
