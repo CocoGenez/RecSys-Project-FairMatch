@@ -79,7 +79,7 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
             "location": row.get("location", "Remote"), # Default
             "skills": row.get("skills", "").split(",") if isinstance(row.get("skills"), str) else [],
             "salary_range": row.get("salary_range", "Competitive"),
-            "description": row.get("job description", "")[:200] + "..." # Snippet
+            "description": row.get("job description", "")
         }
         results.append(job_dict)
 
