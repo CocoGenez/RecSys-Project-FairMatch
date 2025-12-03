@@ -44,11 +44,11 @@ export default function JobseekerSwipePage() {
     country: item.country,
     experience: item.experience,
     qualifications: item.qualifications,
-    workType: item.work_type,
-    companyBucket: item.company_bucket,
+    workType: item.workType,
+    companyBucket: item.companyBucket,
     benefits: item.benefits,
-    companyProfile: item.company_profile,
-    salaryRange: item.salary_range,
+    companyProfile: item.companyProfile,
+    salaryRange: item.salaryRange,
     skills: item.skills
   }))
 

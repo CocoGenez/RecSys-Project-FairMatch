@@ -44,16 +44,44 @@ export function useRecommendations() {
              if (data && data.recommendations) {
 
                // Adapt backend data to frontend interface
-               const adaptedJobs: JobOffer[] = data.recommendations.map((job: any) => ({
-                 id: job.job_id.toString(),
-                 title: job.title,
-                 company: job.company,
-                 location: job.location,
-                 requiredSkills: job.skills,
-                 description: job.description,
-                 salary: job.salary_range,
-                 logo: '💼'
-               }))
+               const adaptedJobs: JobOffer[] = data.recommendations.map((job: any) => {
+                 let companyProfile = null;
+                 try {
+                   if (typeof job.company_profile === 'string') {
+                     companyProfile = JSON.parse(job.company_profile);
+                   } else {
+                     companyProfile = job.company_profile;
+                   }
+                 } catch (e) {
+                   console.error("Error parsing company_profile", e);
+                 }
+
+                 let benefits = job.benefits;
+                 if (typeof benefits === 'string' && benefits.startsWith("{'") && benefits.endsWith("'}")) {
+                   benefits = benefits.substring(2, benefits.length - 2);
+                 }
+
+                 return {
+                   id: job.job_id.toString(),
+                   title: job.title,
+                   company: job.company,
+                   location: job.location,
+                   requiredSkills: job.skills,
+                   description: job.description,
+                   salary: job.salary_range,
+                   logo: '💼',
+                   role: job.role,
+                   country: job.country,
+                   experience: job.experience,
+                   qualifications: job.qualifications,
+                   workType: job.work_type,
+                   companyBucket: job.company_bucket,
+                   benefits: benefits,
+                   companyProfile: companyProfile,
+                   salaryRange: job.salary_range,
+                   skills: job.skills
+                 };
+               })
                setItems(adaptedJobs)
                return
              }
