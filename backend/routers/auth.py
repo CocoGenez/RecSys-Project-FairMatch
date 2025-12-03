@@ -44,7 +44,7 @@ def login_user(user_credentials: schemas.UserLogin, db: Session = Depends(databa
         )
     return user
 
-@router.get("/api/users/{user_id}", response_model=schemas.User)
+@router.get("/api/users/{user_id}")
 def get_user(user_id: int, db: Session = Depends(database.get_db)):
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
@@ -52,4 +52,5 @@ def get_user(user_id: int, db: Session = Depends(database.get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
+    print(f"[DEBUG] User {user_id} found: {user.__dict__}")
     return user
