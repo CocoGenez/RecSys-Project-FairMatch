@@ -75,10 +75,18 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
         job_dict = {
             "job_id": final_id, # Frontend attend string
             "title": row.get("job title", "Unknown Title"),
+            "role": row.get("role", "Unknown Role"),
             "company": row.get("company", "Unknown Company"),
-            "location": row.get("location", "Remote"), # Default
+            "location": row.get("location", "Remote"),
+            "country": row.get("country", "Unknown Country"),
             "skills": row.get("skills", "").split(",") if isinstance(row.get("skills"), str) else [],
             "salary_range": row.get("salary_range", "Competitive"),
+            "experience": row.get("experience", "Not specified"),
+            "qualifications": row.get("qualifications", "Not specified"),
+            "work_type": row.get("work type", "Full-time"),
+            "company_bucket": row.get("companybucket", "Unknown"),
+            "benefits": row.get("benefits", "Not specified"),
+            "company_profile": row.get("company profile", "{}"),
             "description": row.get("job description", "")
         }
         results.append(job_dict)
