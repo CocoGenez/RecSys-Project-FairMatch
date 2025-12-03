@@ -8,6 +8,7 @@ import { ArrowLeft, Heart } from 'lucide-react'
 import JobModal from '@/components/modals/JobModal'
 import { getJobs } from '@/lib/backend'
 import { getLikedItems } from '@/lib/backend'
+import { getLikedJobs } from '@/lib/api'
 import { JobOffer } from '@/lib/types'
 
 export default function MyJobsPage() {
@@ -23,10 +24,73 @@ export default function MyJobsPage() {
       return
     }
 
-    const likedIds = getLikedItems(user.id, 'job')
-    const allJobs = getJobs()
-    const likedJobs = allJobs.filter(j => likedIds.includes(j.id))
-    setJobs(likedJobs)
+    const fetchLikedJobs = async () => {
+      // 1. Try fetching from backend
+      try {
+        if (user.id && !isNaN(parseInt(user.id))) {
+          const backendJobs = await getLikedJobs(parseInt(user.id))
+          if (backendJobs && Array.isArray(backendJobs)) {
+             // Adapt backend data to frontend interface (similar to useRecommendations)
+             const adaptedJobs: JobOffer[] = backendJobs.map((job: any) => {
+               let companyProfile = null;
+               try {
+                 if (typeof job.company_profile === 'string') {
+                   companyProfile = JSON.parse(job.company_profile);
+                 } else {
+                   companyProfile = job.company_profile;
+                 }
+               } catch (e) {
+                 console.error("Error parsing company_profile", e);
+               }
+
+               let benefits = job.benefits;
+               if (typeof benefits === 'string' && benefits.startsWith("{'") && benefits.endsWith("'}")) {
+                 benefits = benefits.substring(2, benefits.length - 2);
+               }
+
+               return {
+                 id: job.job_id.toString(),
+                 recruiterId: '0', // Mock
+                 title: job.title,
+                 company: job.company,
+                 location: job.location,
+                 objectives: job.description, // Map description to objectives
+                 startDate: 'Dès que possible',
+                 requiredQualities: job.skills, // Fallback/Duplicate for display
+                 descriptionType: 'text',
+                 description: job.description,
+                 createdAt: Date.now(),
+                 requiredSkills: job.skills, // Backend returns list from split_skills
+                 salary: job.salary_range,
+                 logo: '💼',
+                 role: job.role,
+                 country: job.country,
+                 experience: job.experience,
+                 qualifications: job.qualifications,
+                 workType: job.work_type,
+                 companyBucket: job.company_bucket,
+                 benefits: benefits,
+                 companyProfile: companyProfile,
+                 salaryRange: job.salary_range,
+                 skills: job.skills,
+               };
+             })
+             setJobs(adaptedJobs)
+             return
+          }
+        }
+      } catch (e) {
+        console.error("Failed to fetch liked jobs from backend", e)
+      }
+
+      // 2. Fallback to local storage
+      const likedIds = getLikedItems(user.id, 'job')
+      const allJobs = getJobs()
+      const likedJobs = allJobs.filter(j => likedIds.includes(j.id))
+      setJobs(likedJobs)
+    }
+
+    fetchLikedJobs()
   }, [user, router])
 
   if (!user || user.role !== 'jobseeker') {

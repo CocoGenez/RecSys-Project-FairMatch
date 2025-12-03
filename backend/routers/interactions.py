@@ -27,3 +27,23 @@ def create_interaction(interaction: InteractionCreate, db: Session = Depends(get
     db.commit()
     db.refresh(db_interaction)
     return {"status": "success", "id": db_interaction.id}
+
+@router.get("/api/liked-jobs/{user_id}")
+def get_liked_jobs(user_id: int, db: Session = Depends(get_db)):
+    # 1. Get liked job IDs from interactions
+    interactions = db.query(Interaction).filter(
+        Interaction.user_id == user_id,
+        Interaction.type == "job",
+        Interaction.action == "like"
+    ).all()
+    
+    if not interactions:
+        return []
+        
+    liked_ids = [i.item_id for i in interactions]
+    
+    # 2. Fetch job details from the dataframe (via base_model)
+    from models.base_model import get_job_details
+    jobs = get_job_details(liked_ids)
+    
+    return jobs

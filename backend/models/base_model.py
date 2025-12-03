@@ -128,6 +128,64 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
     return results
 
 
+def get_job_details(job_ids: list) -> list:
+    """
+    Retrieves job details for a list of job IDs.
+    """
+    if jobs is None:
+        return []
+        
+    results = []
+    
+    # Filter jobs by ID
+    # We need to handle both string and int IDs potentially
+    # The dataframe has a 'jobid' column
+    
+    # Create a mapping for faster lookup if needed, but for now simple filtering
+    # Convert input IDs to strings for comparison
+    target_ids = set(str(jid) for jid in job_ids)
+    
+    # Filter dataframe
+    # We check if 'jobid' column exists and cast to string
+    if "jobid" in jobs.columns:
+        # Create a mask
+        mask = jobs["jobid"].astype(str).isin(target_ids)
+        filtered_df = jobs[mask]
+    else:
+        # Fallback to index if jobid column missing (unlikely based on previous code)
+        # Assuming index is the ID
+        filtered_df = jobs.iloc[[int(jid) for jid in job_ids if str(jid).isdigit() and int(jid) < len(jobs)]]
+
+    for idx, row in filtered_df.iterrows():
+        # Ensure unique ID: use 'jobid' column if valid, else use the dataframe index
+        raw_id = row.get("jobid")
+        if raw_id and str(raw_id).strip() != "" and str(raw_id).lower() != "nan":
+            final_id = str(raw_id)
+        else:
+            final_id = str(idx)
+
+        job_dict = {
+            "job_id": final_id,
+            "title": row.get("job title", "Unknown Title"),
+            "role": row.get("role", "Unknown Role"),
+            "company": row.get("company", "Unknown Company"),
+            "location": row.get("location", "Remote"),
+            "country": row.get("country", "Unknown Country"),
+            "skills": split_skills(row.get("skills", "")),
+            "salary_range": row.get("salary_range", "Competitive"),
+            "experience": row.get("experience", "Not specified"),
+            "qualifications": row.get("qualifications", "Not specified"),
+            "work_type": row.get("work type", "Full-time"),
+            "company_bucket": row.get("companybucket", "Unknown"),
+            "benefits": row.get("benefits", "Not specified"),
+            "company_profile": row.get("company profile", "{}"),
+            "description": row.get("job description", "")
+        }
+        results.append(job_dict)
+        
+    return results
+
+
 if __name__ == "__main__":
     test_text = "python developer machine learning sql data science"
     print(recommend_from_text(test_text))

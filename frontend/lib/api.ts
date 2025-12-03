@@ -46,3 +46,13 @@ export async function saveInteraction(interaction: {
   
   return response.json();
 }
+
+export async function getLikedJobs(userId: number) {
+  const response = await fetch(`${API_URL}/api/liked-jobs/${userId}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch liked jobs');
+  }
+  
+  return response.json();
+}
