@@ -59,7 +59,7 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
       animate={{ scale: 1, y: 0 }}
       exit={{ scale: 0.5, opacity: 0, rotate: 45 }}
       transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      className="absolute w-full max-w-sm h-[600px] cursor-grab active:cursor-grabbing"
+      className="absolute w-full max-w-sm h-[600px] cursor-grab active:cursor-grabbing border-4 border-red-500"
       onClick={handleCardClick}
     >
       <div className="bg-white rounded-3xl shadow-2xl h-full overflow-hidden border-2 border-gray-100 flex flex-col">
