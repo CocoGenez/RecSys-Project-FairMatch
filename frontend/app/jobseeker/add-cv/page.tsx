@@ -20,19 +20,14 @@ export default function AddCVPage() {
     photo: '',
     location: '',
     bio: '',
+    age: '',
+    gender: '',
+    futureCareer: '',
     skills: [] as string[],
-    qualities: [] as string[],
+    projects: [] as string[],
     cvPdfUrl: '',
-    experiences: [] as Experience[],
-    education: [] as Education[],
-    languages: [] as Language[],
-    certifications: [] as string[],
   })
   const [currentSkill, setCurrentSkill] = useState('')
-  const [currentQuality, setCurrentQuality] = useState('')
-  const [currentLanguage, setCurrentLanguage] = useState('')
-  const [currentLanguageLevel, setCurrentLanguageLevel] = useState<'beginner' | 'intermediate' | 'advanced' | 'fluent' | 'native'>('intermediate')
-  const [currentCertification, setCurrentCertification] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -42,7 +37,6 @@ export default function AddCVPage() {
         // 1. Try loading from backend (Registration data)
         try {
           // Check if we have a backendId stored in localStorage (from registration)
-          // Note: The user object from useAuth might not have it directly if it was just updated in localStorage
           const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
           const backendId = storedUser.backendId || (user as any).backendId;
 
@@ -59,15 +53,18 @@ export default function AddCVPage() {
               ...prev,
               firstName: firstName || prev.firstName,
               lastName: lastName || prev.lastName,
-              email: profile.email || prev.email, // Should match auth email usually
+              email: profile.email || prev.email,
               bio: profile.interested_domain ? `Interested in: ${profile.interested_domain}` : prev.bio,
+              age: profile.age ? profile.age.toString() : prev.age,
+              gender: profile.gender || prev.gender,
+              futureCareer: profile.future_career || prev.futureCareer,
               skills: [
                 ...(prev.skills || []),
                 profile.python_level ? `Python (${profile.python_level})` : null,
                 profile.sql_level ? `SQL (${profile.sql_level})` : null,
                 profile.java_level ? `Java (${profile.java_level})` : null
               ].filter(Boolean) as string[],
-              // Add projects to description or experiences if needed
+              projects: profile.projects || prev.projects,
             }));
           }
         } catch (e) {
@@ -86,12 +83,7 @@ export default function AddCVPage() {
             location: existingCandidate.location || prev.location,
             bio: existingCandidate.bio || prev.bio,
             skills: existingCandidate.skills && existingCandidate.skills.length > 0 ? existingCandidate.skills : prev.skills,
-            qualities: existingCandidate.qualities || prev.qualities,
             cvPdfUrl: existingCandidate.cvPdfUrl || prev.cvPdfUrl,
-            experiences: existingCandidate.cvFormData?.experiences || prev.experiences,
-            education: existingCandidate.cvFormData?.education || prev.education,
-            languages: existingCandidate.cvFormData?.languages || prev.languages,
-            certifications: existingCandidate.cvFormData?.certifications || prev.certifications,
           }))
           if (existingCandidate.cvType) {
             setCvType(existingCandidate.cvType)
@@ -128,70 +120,6 @@ export default function AddCVPage() {
     }
   }
 
-  const addExperience = () => {
-    const newExp: Experience = {
-      id: Date.now().toString(),
-      company: '',
-      position: '',
-      startDate: '',
-      endDate: '',
-      description: '',
-      current: false,
-    }
-    setFormData({
-      ...formData,
-      experiences: [...formData.experiences, newExp],
-    })
-  }
-
-  const updateExperience = (id: string, updates: Partial<Experience>) => {
-    setFormData({
-      ...formData,
-      experiences: formData.experiences.map(exp =>
-        exp.id === id ? { ...exp, ...updates } : exp
-      ),
-    })
-  }
-
-  const removeExperience = (id: string) => {
-    setFormData({
-      ...formData,
-      experiences: formData.experiences.filter(exp => exp.id !== id),
-    })
-  }
-
-  const addEducation = () => {
-    const newEdu: Education = {
-      id: Date.now().toString(),
-      school: '',
-      degree: '',
-      field: '',
-      startDate: '',
-      endDate: '',
-      current: false,
-    }
-    setFormData({
-      ...formData,
-      education: [...formData.education, newEdu],
-    })
-  }
-
-  const updateEducation = (id: string, updates: Partial<Education>) => {
-    setFormData({
-      ...formData,
-      education: formData.education.map(edu =>
-        edu.id === id ? { ...edu, ...updates } : edu
-      ),
-    })
-  }
-
-  const removeEducation = (id: string) => {
-    setFormData({
-      ...formData,
-      education: formData.education.filter(edu => edu.id !== id),
-    })
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -219,6 +147,21 @@ export default function AddCVPage() {
     setLoading(true)
 
     try {
+      // We need to adapt the data to match what the backend expects for a Candidate
+      // Since we modified the form to be simpler, we might need to map 'projects' to 'experiences' 
+      // or just store them in bio/description if the backend Candidate model doesn't support raw projects list yet.
+      // However, looking at the Candidate type, it has cvFormData which has experiences.
+      // We can map projects to experiences for now to ensure they are saved.
+      
+      const mappedExperiences: Experience[] = formData.projects.map((proj, index) => ({
+        id: index.toString(),
+        position: 'Project',
+        company: 'Personal/Academic',
+        startDate: '',
+        current: false,
+        description: proj
+      }));
+
       const candidateData: Omit<Candidate, 'id' | 'createdAt'> = {
         userId: user.id,
         firstName: formData.firstName,
@@ -228,14 +171,14 @@ export default function AddCVPage() {
         location: formData.location || 'Non spécifié',
         bio: formData.bio || '',
         skills: formData.skills,
-        qualities: formData.qualities,
+        qualities: [], // Removed from form
         cvType,
         cvPdfUrl: cvType === 'pdf' ? formData.cvPdfUrl : undefined,
         cvFormData: cvType === 'form' ? {
-          experiences: formData.experiences,
-          education: formData.education,
-          languages: formData.languages.length > 0 ? formData.languages : undefined,
-          certifications: formData.certifications.length > 0 ? formData.certifications : undefined,
+          experiences: mappedExperiences,
+          education: [],
+          languages: undefined,
+          certifications: undefined,
         } : undefined,
       }
 
@@ -367,6 +310,39 @@ export default function AddCVPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Age
+                </label>
+                <input
+                  type="text"
+                  value={formData.age}
+                  onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Genre
+                </label>
+                <input
+                  type="text"
+                  value={formData.gender}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Carrière visée
+                </label>
+                <input
+                  type="text"
+                  value={formData.futureCareer}
+                  onChange={(e) => setFormData({ ...formData, futureCareer: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Photo
                 </label>
                 <input
@@ -389,7 +365,7 @@ export default function AddCVPage() {
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                À propos
+                À propos / Domaine d'intérêt
               </label>
               <textarea
                 value={formData.bio}
@@ -421,19 +397,16 @@ export default function AddCVPage() {
             </motion.div>
           ) : (
             <>
-              {/* Compétences et qualités */}
+              {/* Compétences */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
                 className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
               >
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Compétences et qualités</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Compétences</h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Compétences
-                    </label>
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -495,385 +468,50 @@ export default function AddCVPage() {
                       </div>
                     )}
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Qualités
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={currentQuality}
-                        onChange={(e) => setCurrentQuality(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault()
-                            if (currentQuality.trim() && !formData.qualities.includes(currentQuality.trim())) {
-                              setFormData({
-                                ...formData,
-                                qualities: [...formData.qualities, currentQuality.trim()],
-                              })
-                              setCurrentQuality('')
-                            }
-                          }
-                        }}
-                        className="flex-1 px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
-                        placeholder="Ajoutez une qualité..."
-                      />
-                      <motion.button
-                        type="button"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => {
-                          if (currentQuality.trim() && !formData.qualities.includes(currentQuality.trim())) {
-                            setFormData({
-                              ...formData,
-                              qualities: [...formData.qualities, currentQuality.trim()],
-                            })
-                            setCurrentQuality('')
-                          }
-                        }}
-                        className="px-4 py-2 bg-blue-500 text-white rounded-xl font-semibold"
-                      >
-                        <Plus className="w-5 h-5" />
-                      </motion.button>
-                    </div>
-                    {formData.qualities.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.qualities.map((quality) => (
-                          <span
-                            key={quality}
-                            className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium"
-                          >
-                            {quality}
-                            <button
-                              type="button"
-                              onClick={() => setFormData({
-                                ...formData,
-                                qualities: formData.qualities.filter(q => q !== quality),
-                              })}
-                              className="hover:text-red-600"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
                 </div>
               </motion.div>
 
-              {/* Expériences */}
+              {/* Projets */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
                 className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
               >
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-800">Expériences professionnelles</h2>
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={addExperience}
-                    className="px-4 py-2 bg-purple-500 text-white rounded-xl font-semibold flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Ajouter
-                  </motion.button>
-                </div>
-                <div className="space-y-4">
-                  {formData.experiences.map((exp) => (
-                    <div key={exp.id} className="border-2 border-gray-200 rounded-xl p-4 space-y-3">
-                      <div className="grid md:grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          placeholder="Poste"
-                          value={exp.position}
-                          onChange={(e) => updateExperience(exp.id, { position: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none"
-                        />
-                        <input
-                          type="text"
-                          placeholder="Entreprise"
-                          value={exp.company}
-                          onChange={(e) => updateExperience(exp.id, { company: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none"
-                        />
-                        <input
-                          type="date"
-                          value={exp.startDate}
-                          onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none"
-                        />
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="date"
-                            value={exp.endDate || ''}
-                            onChange={(e) => updateExperience(exp.id, { endDate: e.target.value, current: !e.target.value })}
-                            disabled={exp.current}
-                            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                          />
-                          <label className="flex items-center gap-2 text-sm">
-                            <input
-                              type="checkbox"
-                              checked={exp.current}
-                              onChange={(e) => updateExperience(exp.id, { current: e.target.checked, endDate: e.target.checked ? '' : exp.endDate })}
-                            />
-                            Actuel
-                          </label>
-                        </div>
-                      </div>
-                      <textarea
-                        placeholder="Description"
-                        value={exp.description}
-                        onChange={(e) => updateExperience(exp.id, { description: e.target.value })}
-                        rows={3}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none resize-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeExperience(exp.id)}
-                        className="text-red-600 hover:text-red-800 text-sm font-semibold"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Formation */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-800">Formation</h2>
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={addEducation}
-                    className="px-4 py-2 bg-purple-500 text-white rounded-xl font-semibold flex items-center gap-2"
-                  >
-                    <Plus className="w-4 h-4" />
-                    Ajouter
-                  </motion.button>
-                </div>
-                <div className="space-y-4">
-                  {formData.education.map((edu) => (
-                    <div key={edu.id} className="border-2 border-gray-200 rounded-xl p-4 space-y-3">
-                      <div className="grid md:grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          placeholder="Diplôme"
-                          value={edu.degree}
-                          onChange={(e) => updateEducation(edu.id, { degree: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none"
-                        />
-                        <input
-                          type="text"
-                          placeholder="École/Université"
-                          value={edu.school}
-                          onChange={(e) => updateEducation(edu.id, { school: e.target.value })}
-                          className="px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none"
-                        />
-                        <textarea
-                          placeholder="Description"
-                          value={edu.field}
-                          onChange={(e) => updateEducation(edu.id, { field: e.target.value })}
-                          rows={2}
-                          className="px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none resize-none"
-                        />
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="date"
-                            value={edu.startDate}
-                            onChange={(e) => updateEducation(edu.id, { startDate: e.target.value })}
-                            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none"
-                          />
-                          <input
-                            type="date"
-                            value={edu.endDate || ''}
-                            onChange={(e) => updateEducation(edu.id, { endDate: e.target.value, current: !e.target.value })}
-                            disabled={edu.current}
-                            className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                          />
-                          <label className="flex items-center gap-2 text-sm whitespace-nowrap">
-                            <input
-                              type="checkbox"
-                              checked={edu.current}
-                              onChange={(e) => updateEducation(edu.id, { current: e.target.checked, endDate: e.target.checked ? '' : edu.endDate })}
-                            />
-                            Actuel
-                          </label>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeEducation(edu.id)}
-                        className="text-red-600 hover:text-red-800 text-sm font-semibold"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Langues et certifications */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
-              >
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">Langues</h3>
-                    <div className="space-y-2 mb-2">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={currentLanguage}
-                          onChange={(e) => setCurrentLanguage(e.target.value)}
-                          className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none"
-                          placeholder="Ajouter une langue..."
-                        />
-                        <motion.button
-                          type="button"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => {
-                            if (currentLanguage.trim() && !formData.languages.some(l => l.name === currentLanguage.trim())) {
-                              setFormData({
-                                ...formData,
-                                languages: [...formData.languages, {
-                                  name: currentLanguage.trim(),
-                                  level: currentLanguageLevel
-                                }],
-                              })
-                              setCurrentLanguage('')
-                              setCurrentLanguageLevel('intermediate')
-                            }
-                          }}
-                          className="px-3 py-2 bg-green-500 text-white rounded-lg flex-shrink-0"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </motion.button>
-                      </div>
-                      <select
-                        value={currentLanguageLevel}
-                        onChange={(e) => setCurrentLanguageLevel(e.target.value as Language['level'])}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none bg-white"
-                      >
-                        <option value="beginner">Débutant</option>
-                        <option value="intermediate">Intermédiaire</option>
-                        <option value="advanced">Avancé</option>
-                        <option value="fluent">Courant</option>
-                        <option value="native">Natif</option>
-                      </select>
-                    </div>
-                    {formData.languages.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.languages.map((lang, idx) => {
-                          const levelLabels: Record<Language['level'], string> = {
-                            beginner: 'Débutant',
-                            intermediate: 'Intermédiaire',
-                            advanced: 'Avancé',
-                            fluent: 'Courant',
-                            native: 'Natif'
-                          }
-                          return (
-                            <span
-                              key={idx}
-                              className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm"
-                            >
-                              {lang.name} <span className="text-xs text-green-600">({levelLabels[lang.level]})</span>
-                              <button
-                                type="button"
-                                onClick={() => setFormData({
-                                  ...formData,
-                                  languages: formData.languages.filter((_, i) => i !== idx),
-                                })}
-                                className="hover:text-red-600 ml-1"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-800 mb-3">Certifications</h3>
-                    <div className="flex gap-2">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Projets</h2>
+                <div className="space-y-2">
+                  {formData.projects.map((project, index) => (
+                    <div key={index} className="flex gap-2">
                       <input
                         type="text"
-                        value={currentCertification}
-                        onChange={(e) => setCurrentCertification(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault()
-                            if (currentCertification.trim() && !formData.certifications.includes(currentCertification.trim())) {
-                              setFormData({
-                                ...formData,
-                                certifications: [...formData.certifications, currentCertification.trim()],
-                              })
-                              setCurrentCertification('')
-                            }
-                          }
+                        value={project}
+                        onChange={(e) => {
+                           const newProjects = [...formData.projects];
+                           newProjects[index] = e.target.value;
+                           setFormData({ ...formData, projects: newProjects });
                         }}
-                        className="flex-1 px-3 py-2 rounded-lg border border-gray-200 focus:border-purple-500 focus:outline-none"
-                        placeholder="Ajouter une certification..."
+                        className="flex-1 px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
                       />
-                      <motion.button
+                      <button
                         type="button"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
                         onClick={() => {
-                          if (currentCertification.trim() && !formData.certifications.includes(currentCertification.trim())) {
-                            setFormData({
-                              ...formData,
-                              certifications: [...formData.certifications, currentCertification.trim()],
-                            })
-                            setCurrentCertification('')
-                          }
+                           const newProjects = formData.projects.filter((_, i) => i !== index);
+                           setFormData({ ...formData, projects: newProjects });
                         }}
-                        className="px-3 py-2 bg-yellow-500 text-white rounded-lg"
+                        className="text-red-600 hover:text-red-800"
                       >
-                        <Plus className="w-4 h-4" />
-                      </motion.button>
+                        <X className="w-5 h-5" />
+                      </button>
                     </div>
-                    {formData.certifications.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {formData.certifications.map((cert) => (
-                          <span
-                            key={cert}
-                            className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm"
-                          >
-                            {cert}
-                            <button
-                              type="button"
-                              onClick={() => setFormData({
-                                ...formData,
-                                certifications: formData.certifications.filter(c => c !== cert),
-                              })}
-                              className="hover:text-red-600"
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                  ))}
+                   <button
+                    type="button"
+                    onClick={() => setFormData({ ...formData, projects: [...formData.projects, ''] })}
+                    className="mt-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-xl font-semibold flex items-center gap-2 hover:bg-purple-200 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Ajouter un projet
+                  </button>
                 </div>
               </motion.div>
             </>
