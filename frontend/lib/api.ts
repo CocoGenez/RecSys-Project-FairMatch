@@ -56,3 +56,13 @@ export async function getLikedJobs(userId: number) {
   
   return response.json();
 }
+
+export async function getUserProfile(userId: number) {
+  const response = await fetch(`${API_URL}/auth/api/users/${userId}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch user profile');
+  }
+  
+  return response.json();
+}
