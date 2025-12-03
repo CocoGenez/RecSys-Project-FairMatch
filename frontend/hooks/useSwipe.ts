@@ -24,21 +24,12 @@ export function useSwipe(items: (Candidate | JobOffer)[]) {
 
       // Save to backend
       try {
-        let userId = (user as any).backendId
-        if (!userId) {
-          try {
-            const stored = localStorage.getItem('user')
-            if (stored) {
-              userId = JSON.parse(stored).backendId
-            }
-          } catch (e) {
-            // ignore
-          }
-        }
-
+        let userId = user.id
+        
+        // Ensure we have a valid ID
         if (userId && !isNaN(parseInt(userId))) {
           await saveInteraction({
-            user_id: userId,
+            user_id: parseInt(userId),
             item_id: currentItem.id,
             type: itemType,
             action: action,
