@@ -1,4 +1,4 @@
-// Mock data pour les candidats et les offres d'emploi
+// Mock data for candidates and job offers
 
 export interface Candidate {
   id: string

@@ -3,8 +3,8 @@ import './globals.css'
 import { Providers } from '@/components/Providers'
 
 export const metadata: Metadata = {
-  title: 'FairMatch - Trouvez votre match parfait',
-  description: 'Application de matching entre recruteurs et candidats',
+  title: 'FairMatch – Find your perfect match',
+  description: 'Matching app between recruiters and candidates',
 }
 
 export default function RootLayout({

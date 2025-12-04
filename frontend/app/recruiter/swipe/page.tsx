@@ -86,7 +86,7 @@ export default function RecruiterSwipePage() {
           className="flex items-center justify-between mb-6"
         >
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Trouvez des candidats
+            Find candidates
           </h1>
           <div className="flex gap-2">
             <div className="flex items-center gap-1">
@@ -95,7 +95,7 @@ export default function RecruiterSwipePage() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => router.push('/recruiter/jobs')}
                 className="p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
-                title="Mes offres"
+                title="My offers"
               >
                 <List className="w-5 h-5 text-purple-600" />
               </motion.button>
@@ -104,7 +104,7 @@ export default function RecruiterSwipePage() {
                 whileTap={{ scale: 0.9 }}
                 onClick={() => router.push('/recruiter/add-job')}
                 className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
-                title="Ajouter un job"
+                title="Add a job"
               >
                 <Plus className="w-4 h-4" />
               </motion.button>
@@ -114,7 +114,7 @@ export default function RecruiterSwipePage() {
               whileTap={{ scale: 0.9 }}
               onClick={() => router.push('/recruiter/my-candidates')}
               className="p-2 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow"
-              title="Mes candidats"
+              title="My candidates"
             >
               <Heart className="w-5 h-5 text-purple-600" />
             </motion.button>
@@ -141,7 +141,7 @@ export default function RecruiterSwipePage() {
                 <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Plus de candidats !</h2>
                 <p className="text-gray-600 mb-6">
-                  Vous avez parcouru tous les candidats disponibles.
+                  You have viewed all available candidates.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -149,7 +149,7 @@ export default function RecruiterSwipePage() {
                   onClick={() => router.push('/recruiter/my-candidates')}
                   className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
                 >
-                  Voir mes candidats retenus
+                  View my selected candidates
                 </motion.button>
               </div>
             </motion.div>

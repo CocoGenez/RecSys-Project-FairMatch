@@ -23,18 +23,18 @@ export default function LoginPage() {
     const success = await login(email, password)
     
     if (success) {
-      // La redirection se fait dans le useEffect de la page principale
+      // Redirect happens in the main page useEffect
       router.push('/')
     } else {
-      setError('Email ou mot de passe incorrect')
+      setError('Incorrect email or password')
     }
-    
+
     setLoading(false)
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
-      {/* Bouton retour à l'accueil */}
+      {/* Back to home button */}
       <motion.button
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -42,7 +42,7 @@ export default function LoginPage() {
         whileTap={{ scale: 0.9 }}
         onClick={() => router.push('/')}
         className="fixed top-4 left-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
-        title="Retour à l'accueil"
+        title="Back to home"
       >
         <Home className="w-5 h-5 text-purple-600" />
       </motion.button>
@@ -66,7 +66,7 @@ export default function LoginPage() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
               FairMatch
             </h1>
-            <p className="text-gray-600">Connectez-vous à votre compte</p>
+            <p className="text-gray-600">Sign in to your account</p>
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -86,7 +86,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all duration-200 bg-white"
-                  placeholder="votre@email.com"
+                  placeholder="your@email.com"
                 />
               </div>
             </motion.div>
@@ -97,7 +97,7 @@ export default function LoginPage() {
               transition={{ delay: 0.4 }}
             >
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mot de passe
+                Password
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -129,7 +129,7 @@ export default function LoginPage() {
               whileTap={{ scale: 0.98 }}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? 'Login...' : 'Sign in'}
             </motion.button>
           </form>
 
@@ -140,9 +140,9 @@ export default function LoginPage() {
             className="mt-6 text-center"
           >
             <p className="text-gray-600">
-              Pas encore de compte ?{' '}
+              Don't have an account?{' '}
               <Link href="/register" className="text-purple-600 font-semibold hover:text-purple-700 transition-colors">
-                S'inscrire
+                Sign up
               </Link>
             </p>
           </motion.div>

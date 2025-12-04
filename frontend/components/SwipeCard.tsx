@@ -66,7 +66,7 @@ export default function SwipeCard({ candidate, jobOffer, onSwipe, index }: Swipe
               <div>
                 <div className="flex items-center gap-2 text-gray-600 mb-3">
                   <Code className="w-5 h-5" />
-                  <span className="font-semibold">Compétences</span>
+                  <span className="font-semibold">Skills</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {candidate.skills.map((skill, idx) => (
@@ -104,7 +104,7 @@ export default function SwipeCard({ candidate, jobOffer, onSwipe, index }: Swipe
               <div>
                 <div className="flex items-center gap-2 text-gray-600 mb-3">
                   <Code className="w-5 h-5" />
-                  <span className="font-semibold">Compétences requises</span>
+                  <span className="font-semibold">Required skills</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {jobOffer.requiredSkills.map((skill, idx) => (

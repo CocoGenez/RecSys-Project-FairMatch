@@ -28,16 +28,15 @@ export default function FlipCard({ candidate, onSwipe, index, onViewCV }: FlipCa
     if (Math.abs(info.offset.x) > threshold) {
       onSwipe(info.offset.x > 0 ? 'right' : 'left')
     } else {
-      // Reset position avec animation
+      // Reset position
       x.set(0)
     }
-    // Reset isDragging après un court délai
+    // Reset isDragging after short delay
     setTimeout(() => setIsDragging(false), 100)
   }
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    // Ne pas ouvrir le modal si on vient de dragger
     if (!isDragging && Math.abs(x.get()) < 10) {
       onViewCV(candidate)
     }
@@ -109,7 +108,7 @@ export default function FlipCard({ candidate, onSwipe, index, onViewCV }: FlipCa
           </div>
           
           <div className="mb-4">
-            <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Qualités</h3>
+            <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Qualities</h3>
             <div className="flex flex-wrap gap-1.5 justify-center">
               {candidate.qualities.slice(0, 3).map((quality, idx) => (
                 <span

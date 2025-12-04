@@ -1,5 +1,3 @@
-// Backend simple avec localStorage
-
 import { User, Candidate, JobOffer, Swipe, UserRole } from './types'
 
 const STORAGE_KEYS = {
@@ -95,7 +93,6 @@ export function createJob(job: Omit<JobOffer, 'id' | 'createdAt'>): JobOffer {
 
 export function getJobs(): JobOffer[] {
   const jobs = JSON.parse(localStorage.getItem(STORAGE_KEYS.jobs) || '[]')
-  // S'assurer que tous les jobs ont requiredQualities
   return jobs.map((job: any) => ({
     ...job,
     requiredQualities: job.requiredQualities || [],
@@ -128,7 +125,7 @@ export function createSwipe(swipe: Omit<Swipe, 'timestamp'>): Swipe {
     timestamp: Date.now(),
   }
   
-  // Vérifier si le swipe existe déjà
+  // Check if swipe already exists
   const existingIndex = swipes.findIndex(
     s => s.userId === swipe.userId && s.itemId === swipe.itemId && s.type === swipe.type
   )

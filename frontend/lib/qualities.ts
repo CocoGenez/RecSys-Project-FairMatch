@@ -1,4 +1,4 @@
-// Liste des qualités prédéfinies pour le filtrage intelligent
+// List of predefined qualities for filtering
 
 export const PREDEFINED_QUALITIES = [
   'autonome',

@@ -50,7 +50,7 @@ export default function MyCandidatesPage() {
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </motion.button>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Mes candidats retenus
+            My selected candidates
           </h1>
         </motion.div>
 
@@ -61,9 +61,9 @@ export default function MyCandidatesPage() {
             className="bg-white rounded-3xl shadow-xl p-12 text-center"
           >
             <div className="text-6xl mb-4">💼</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Aucun candidat retenu</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">No candidates selected</h2>
             <p className="text-gray-600 mb-6">
-              Commencez à swiper pour trouver des candidats qui vous intéressent !
+              Start swiping to find candidates that interest you !
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -71,7 +71,7 @@ export default function MyCandidatesPage() {
               onClick={() => router.push('/recruiter/swipe')}
               className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
             >
-              Commencer à swiper
+              Start swiping
             </motion.button>
           </motion.div>
         ) : (
@@ -119,7 +119,7 @@ export default function MyCandidatesPage() {
                   </div>
                   
                   <div className="mb-4">
-                    <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Compétences</h3>
+                    <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Skills</h3>
                     <div className="flex flex-wrap gap-1.5 justify-center">
                       {candidate.skills.slice(0, 3).map((skill, idx) => (
                         <span
@@ -138,7 +138,7 @@ export default function MyCandidatesPage() {
                   </div>
                   
                   <div className="mb-4">
-                    <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Qualités</h3>
+                    <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Qualities</h3>
                     <div className="flex flex-wrap gap-1.5 justify-center">
                       {candidate.qualities.slice(0, 3).map((quality, idx) => (
                         <span

@@ -46,7 +46,7 @@ export default function SelectRolePage() {
             transition={{ delay: 0.3 }}
             className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4"
           >
-            Choisissez votre rôle
+            Choose your role
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -54,7 +54,7 @@ export default function SelectRolePage() {
             transition={{ delay: 0.4 }}
             className="text-xl text-gray-600"
           >
-            Comment souhaitez-vous utiliser FairMatch ?
+            How would you like to use FairMatch?
           </motion.p>
         </div>
 
@@ -72,12 +72,12 @@ export default function SelectRolePage() {
               <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform duration-300 shadow-lg">
                 <Briefcase className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Recruteur</h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Recruiter</h2>
               <p className="text-gray-600 text-lg mb-6">
-                Trouvez les meilleurs candidats pour votre entreprise. Swipez à droite sur les profils qui vous intéressent !
+                Find the best candidates for your company. Swipe right on the profiles that interest you!
               </p>
               <div className="flex items-center text-purple-600 font-semibold group-hover:text-purple-700">
-                Commencer
+                Get started
                 <motion.span
                   animate={{ x: [0, 5, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}
@@ -102,12 +102,12 @@ export default function SelectRolePage() {
               <div className="w-24 h-24 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform duration-300 shadow-lg">
                 <UserSearch className="w-12 h-12 text-white" />
               </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-4">Rechercheur d'emploi</h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-4">Job seeker</h2>
               <p className="text-gray-600 text-lg mb-6">
-                Découvrez des offres d'emploi qui correspondent à vos compétences. Swipez à droite sur celles qui vous plaisent !
+                Discover job offers that match your skills. Swipe right on the ones you like!
               </p>
               <div className="flex items-center text-pink-600 font-semibold group-hover:text-pink-700">
-                Commencer
+                Get started
                 <motion.span
                   animate={{ x: [0, 5, 0] }}
                   transition={{ repeat: Infinity, duration: 1.5 }}

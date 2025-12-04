@@ -12,11 +12,10 @@ interface JobSwipeCardProps {
   index: number
 }
 
-// Function to get icon and gradient based on job title
+// Function to get icon & gradient from job title
 function getJobTheme(title: string) {
   const lowerTitle = title.toLowerCase()
   
-  // UX/UI Designer, UX Researcher - Design roles
   if (lowerTitle.includes('ux') || lowerTitle.includes('ui') || lowerTitle.includes('designer')) {
     return {
       icon: Palette,
@@ -25,8 +24,9 @@ function getJobTheme(title: string) {
     }
   }
   
-  // Data roles - Data Analyst, Data Engineer, Data Scientist
+  // Create an icon for each data roles
   if (lowerTitle.includes('data')) {
+    // Data scientist
     if (lowerTitle.includes('scientist')) {
       return {
         icon: Cpu,
@@ -34,6 +34,7 @@ function getJobTheme(title: string) {
         bgColor: 'bg-gradient-to-br from-violet-500 to-purple-600'
       }
     }
+    // Data engineer
     if (lowerTitle.includes('engineer')) {
       return {
         icon: Database,
@@ -50,6 +51,7 @@ function getJobTheme(title: string) {
   }
   
   // Frontend/Backend/Web/Software Developer roles
+  // Frontend
   if (lowerTitle.includes('front-end') || lowerTitle.includes('frontend')) {
     return {
       icon: Smartphone,
@@ -57,6 +59,7 @@ function getJobTheme(title: string) {
       bgColor: 'bg-gradient-to-br from-teal-400 to-cyan-500'
     }
   }
+  // Backend
   if (lowerTitle.includes('back-end') || lowerTitle.includes('backend')) {
     return {
       icon: Server,
@@ -64,6 +67,7 @@ function getJobTheme(title: string) {
       bgColor: 'bg-gradient-to-br from-indigo-500 to-blue-600'
     }
   }
+  // Web Developer / Software Developer
   if (lowerTitle.includes('web developer') || lowerTitle.includes('software developer') || lowerTitle.includes('java developer')) {
     return {
       icon: Code,
@@ -90,7 +94,7 @@ function getJobTheme(title: string) {
     }
   }
   
-  // Security roles
+  // Cybersecurity
   if (lowerTitle.includes('security') || lowerTitle.includes('network')) {
     return {
       icon: Zap,
@@ -122,7 +126,7 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
     if (Math.abs(info.offset.x) > threshold) {
       onSwipe(info.offset.x > 0 ? 'right' : 'left')
     } else {
-      // Reset position avec animation
+      // Reset position
       x.set(0)
     }
     setTimeout(() => setIsDragging(false), 100)
@@ -130,7 +134,6 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
 
   const handleCardClick = (e: React.MouseEvent) => {
     e.stopPropagation()
-    // Ne pas ouvrir le modal si on vient de dragger
     if (!isDragging && Math.abs(x.get()) < 10) {
       onJobClick(job)
     }
@@ -158,7 +161,6 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
       onClick={handleCardClick}
     >
       <div className="bg-white rounded-3xl shadow-2xl h-full overflow-hidden border-2 border-gray-100 flex flex-col">
-        {/* Dynamic Header based on job title */}
         {(() => {
           const theme = getJobTheme(job.title)
           const Icon = theme.icon
@@ -169,7 +171,6 @@ export default function JobSwipeCard({ job, onSwipe, onJobClick, index }: JobSwi
           )
         })()}
         
-        {/* Informations essentielles */}
         <div className="flex-1 p-6 flex flex-col">
           <div className="text-center mb-4">
             <h2 className="text-xl font-bold text-gray-800 mb-1 line-clamp-2">{job.title}</h2>

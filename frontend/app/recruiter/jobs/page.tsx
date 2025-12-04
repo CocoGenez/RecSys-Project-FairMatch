@@ -45,7 +45,7 @@ export default function RecruiterJobsPage() {
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </motion.button>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Mes offres d'emploi
+              My job offers
             </h1>
           </div>
           <motion.button
@@ -55,7 +55,7 @@ export default function RecruiterJobsPage() {
             className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
-            Ajouter une offre
+            Add an offer
           </motion.button>
         </motion.div>
 
@@ -66,9 +66,9 @@ export default function RecruiterJobsPage() {
             className="bg-white rounded-3xl shadow-xl p-12 text-center"
           >
             <div className="text-6xl mb-4">💼</div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">Aucune offre créée</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">No offers created</h2>
             <p className="text-gray-600 mb-6">
-              Créez votre première offre d'emploi pour commencer à recruter !
+              Create your first job offer to start recruiting !
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -76,7 +76,7 @@ export default function RecruiterJobsPage() {
               onClick={() => router.push('/recruiter/add-job')}
               className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
             >
-              Créer une offre
+              Create an offer
             </motion.button>
           </motion.div>
         ) : (
@@ -102,7 +102,7 @@ export default function RecruiterJobsPage() {
                   </div>
                   <p className="text-gray-700 mb-4 leading-relaxed line-clamp-2">{job.objectives}</p>
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-600 mb-2">Qualités requises</h3>
+                    <h3 className="text-sm font-semibold text-gray-600 mb-2">Required qualities</h3>
                     <div className="flex flex-wrap gap-2">
                       {job.requiredQualities && job.requiredQualities.length > 0 ? (
                         <>
@@ -121,7 +121,7 @@ export default function RecruiterJobsPage() {
                           )}
                         </>
                       ) : (
-                        <span className="text-gray-500 text-sm">Aucune qualité spécifiée</span>
+                        <span className="text-gray-500 text-sm">No qualities specified</span>
                       )}
                     </div>
                   </div>

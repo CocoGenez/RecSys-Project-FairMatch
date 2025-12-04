@@ -40,7 +40,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        // Handle errors like 404 Not Found or 401 Unauthorized
         console.error('Login failed:', await response.text());
         return false;
       }
@@ -67,7 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (!response.ok) {
-        // Handle errors like 409 Conflict (email already exists)
         console.error('Registration failed:', await response.text());
         return false;
       }
@@ -75,7 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const newUser = await response.json();
       const userData = { id: newUser.id.toString(), email: newUser.email, role: newUser.role };
 
-      // Automatically log in the user after successful registration
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       return true;
@@ -97,7 +94,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(updatedUser)
       localStorage.setItem('user', JSON.stringify(updatedUser))
       
-      // Mettre à jour aussi dans la liste des users
       const users = JSON.parse(localStorage.getItem('users') || '[]')
       const userIndex = users.findIndex((u: any) => u.id === user.id)
       if (userIndex !== -1) {

@@ -30,23 +30,23 @@ export default function RegisterPage() {
     setError('')
 
     if (!role) {
-      setError('Veuillez sélectionner un rôle')
+      setError('Please select a role')
       return
     }
 
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas')
+      setError('Passwords do not match')
       return
     }
 
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères')
+      setError('The password must be at least 6 characters long')
       return
     }
 
     if (role === 'jobseeker') {
       if (!name || !gender || !interestedDomain || !resumeFile) {
-        setError('Veuillez remplir tous les champs et télécharger votre CV')
+        setError('Please fill in all fields and upload your CV')
         return
       }
     }
@@ -58,7 +58,7 @@ export default function RegisterPage() {
       const success = await register(email, password, role)
       
       if (!success) {
-        throw new Error('Cet email est déjà utilisé')
+        throw new Error('This email is already in use')
       }
 
       // 2. If Job Seeker, upload resume to backend
@@ -93,7 +93,7 @@ export default function RegisterPage() {
       }
 
     } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue')
+      setError(err.message || 'An error occurred')
     } finally {
       setLoading(false)
     }
@@ -109,7 +109,7 @@ export default function RegisterPage() {
         whileTap={{ scale: 0.9 }}
         onClick={() => router.push('/')}
         className="fixed top-4 left-4 p-3 bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow z-50"
-        title="Retour à l'accueil"
+        title="Back to home"
       >
         <Home className="w-5 h-5 text-purple-600" />
       </motion.button>
@@ -133,7 +133,7 @@ export default function RegisterPage() {
             <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
               FairMatch
             </h1>
-            <p className="text-gray-600">Créez votre compte</p>
+            <p className="text-gray-600">Create your account</p>
           </motion.div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -144,18 +144,18 @@ export default function RegisterPage() {
               transition={{ delay: 0.3 }}
             >
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Je suis un(e)...
+                I am a...
               </label>
               <div className="grid grid-cols-2 gap-4">
                 <div
                   className="p-4 rounded-xl border-2 border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed relative"
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-semibold">En développement</span>
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-semibold">In development</span>
                   </div>
                   <Briefcase className="w-6 h-6 mx-auto mb-2 text-gray-400" />
                   <p className="text-sm font-semibold text-center text-gray-400">
-                    Recruteur
+                    Recruiteur
                   </p>
                 </div>
                 <motion.div
@@ -174,7 +174,7 @@ export default function RegisterPage() {
                   <p className={`text-sm font-semibold text-center ${
                     role === 'jobseeker' ? 'text-pink-600' : 'text-gray-600'
                   }`}>
-                    Candidat
+                    Candidate
                   </p>
                 </motion.div>
               </div>
@@ -188,7 +188,7 @@ export default function RegisterPage() {
                 className="space-y-4 border-l-2 border-pink-200 pl-4"
               >
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Nom complet</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full name</label>
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
@@ -202,21 +202,21 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Genre</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
                   <select
                     value={gender}
                     onChange={(e) => setGender(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-pink-500 focus:outline-none bg-white"
                   >
-                    <option value="">Sélectionner...</option>
-                    <option value="Male">Homme</option>
-                    <option value="Female">Femme</option>
-                    <option value="Other">Autre</option>
+                    <option value="">Select...</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Domaine d'intérêt</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Field of interest</label>
                   <div className="relative">
                     <Heart className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
@@ -271,7 +271,7 @@ export default function RegisterPage() {
               transition={{ delay: 0.5 }}
             >
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mot de passe
+                Password
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -292,7 +292,7 @@ export default function RegisterPage() {
               transition={{ delay: 0.6 }}
             >
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirmer le mot de passe
+                Confirm password
               </label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -324,7 +324,7 @@ export default function RegisterPage() {
               whileTap={{ scale: 0.98 }}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Inscription...' : "S'inscrire"}
+              {loading ? 'Sign up...' : "Register"}
             </motion.button>
           </form>
 
@@ -335,9 +335,9 @@ export default function RegisterPage() {
             className="mt-6 text-center"
           >
             <p className="text-gray-600">
-              Déjà un compte ?{' '}
+              Already have an account ?{' '}
               <Link href="/login" className="text-purple-600 font-semibold hover:text-purple-700 transition-colors">
-                Se connecter
+                Log in
               </Link>
             </p>
           </motion.div>

@@ -1,4 +1,4 @@
-// Gestion des swipes avec localStorage
+// Handle swipes with localStorage
 
 export interface Swipe {
   userId: string
@@ -20,7 +20,7 @@ export function saveSwipe(userId: string, itemId: string, type: 'candidate' | 'j
     timestamp: Date.now()
   }
   
-  // Vérifier si le swipe existe déjà
+  // Verify if the swipe already exists
   const existingIndex = swipes.findIndex(
     s => s.userId === userId && s.itemId === itemId && s.type === type
   )

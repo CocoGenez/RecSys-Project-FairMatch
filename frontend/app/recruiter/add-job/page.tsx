@@ -64,7 +64,7 @@ export default function AddJobPage() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      // Simuler l'upload - dans une vraie app, vous utiliseriez un service de stockage
+      // Simulate the upload
       const reader = new FileReader()
       reader.onload = (event) => {
         const url = event.target?.result as string
@@ -83,17 +83,17 @@ export default function AddJobPage() {
     setError('')
 
     if (!user || user.role !== 'recruiter') {
-      setError('Vous devez être connecté en tant que recruteur')
+      setError('You must be logged in as a recruiter')
       return
     }
 
     if (!formData.title || !formData.objectives || !formData.startDate) {
-      setError('Veuillez remplir tous les champs obligatoires')
+      setError('Please fill in all required fields')
       return
     }
 
     if (formData.requiredQualities.length === 0) {
-      setError('Veuillez ajouter au moins une qualité requise')
+      setError('Please add at least one required quality')
       return
     }
 
@@ -103,8 +103,8 @@ export default function AddJobPage() {
       const jobData: Omit<JobOffer, 'id' | 'createdAt'> = {
         recruiterId: user.id,
         title: formData.title,
-        company: formData.company || 'Entreprise',
-        location: formData.location || 'Non spécifié',
+        company: formData.company || 'Company',
+        location: formData.location || 'Not specified',
         objectives: formData.objectives,
         startDate: formData.startDate,
         requiredQualities: formData.requiredQualities,
@@ -118,7 +118,7 @@ export default function AddJobPage() {
       createJob(jobData)
       router.push('/recruiter/jobs')
     } catch (err) {
-      setError('Une erreur est survenue lors de la création de l\'offre')
+      setError('An error occurred while creating the offer')
     } finally {
       setLoading(false)
     }
@@ -141,7 +141,7 @@ export default function AddJobPage() {
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </motion.button>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Ajouter une offre d'emploi
+            Add a job offer
           </h1>
         </motion.div>
 
@@ -151,12 +151,12 @@ export default function AddJobPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Informations générales</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">General information</h2>
             
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Intitulé du poste <span className="text-red-500">*</span>
+                  Job title <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -171,7 +171,7 @@ export default function AddJobPage() {
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Entreprise
+                    Company
                   </label>
                   <input
                     type="text"
@@ -183,7 +183,7 @@ export default function AddJobPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Localisation
+                    Location
                   </label>
                   <input
                     type="text"
@@ -197,7 +197,7 @@ export default function AddJobPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Objectifs de la mission <span className="text-red-500">*</span>
+                  Mission objectives <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={formData.objectives}
@@ -211,7 +211,7 @@ export default function AddJobPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Date de début souhaitée <span className="text-red-500">*</span>
+                  Desired start date <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -231,7 +231,7 @@ export default function AddJobPage() {
             transition={{ delay: 0.1 }}
             className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Qualités requises <span className="text-red-500">*</span></h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Required qualities <span className="text-red-500">*</span></h2>
             
             <div className="space-y-4">
               <div className="relative">
@@ -311,7 +311,7 @@ export default function AddJobPage() {
             transition={{ delay: 0.2 }}
             className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Description du poste</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Job description</h2>
             
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
@@ -327,7 +327,7 @@ export default function AddJobPage() {
                   }`}
                 >
                   <Type className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                  <p className="text-sm font-semibold">Texte</p>
+                  <p className="text-sm font-semibold">Text</p>
                 </motion.button>
                 <motion.button
                   type="button"
@@ -355,7 +355,7 @@ export default function AddJobPage() {
                   }`}
                 >
                   <LinkIcon className="w-6 h-6 mx-auto mb-2 text-purple-600" />
-                  <p className="text-sm font-semibold">Lien</p>
+                  <p className="text-sm font-semibold">Link</p>
                 </motion.button>
               </div>
 
@@ -378,7 +378,7 @@ export default function AddJobPage() {
                     className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
                   />
                   {formData.documentName && (
-                    <p className="mt-2 text-sm text-gray-600">Fichier sélectionné: {formData.documentName}</p>
+                    <p className="mt-2 text-sm text-gray-600">Selected file: {formData.documentName}</p>
                   )}
                 </div>
               )}
@@ -418,7 +418,7 @@ export default function AddJobPage() {
               onClick={() => router.back()}
               className="flex-1 px-6 py-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
             >
-              Annuler
+              Cancel
             </motion.button>
             <motion.button
               type="submit"
@@ -428,7 +428,7 @@ export default function AddJobPage() {
               className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Save className="w-5 h-5" />
-              {loading ? 'Création...' : 'Créer l\'offre'}
+              {loading ? 'Creating...' : 'Create Offer'}
             </motion.button>
           </motion.div>
         </form>

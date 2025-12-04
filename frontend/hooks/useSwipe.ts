@@ -19,14 +19,14 @@ export function useSwipe(items: (Candidate | JobOffer)[]) {
       const itemType = user.role === 'recruiter' ? 'candidate' : 'job'
       const action = direction === 'right' ? 'like' : 'pass'
       
-      // Save locally (for immediate UI feedback/consistency if needed)
+      // Save locally
       saveSwipeLocal(user.id, currentItem.id, itemType, action)
 
       // Save to backend
       try {
         let userId = user.id
         
-        // Ensure we have a valid ID
+        // If the ID is valid
         if (userId && !isNaN(parseInt(userId))) {
           await saveInteraction({
             user_id: parseInt(userId),

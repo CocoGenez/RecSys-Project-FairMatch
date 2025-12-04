@@ -66,9 +66,9 @@ export default function SwipePage() {
             >
               <div className="text-center p-8">
                 <div className="text-6xl mb-4">🎉</div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Plus de profils !</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">No more profiles!</h2>
                 <p className="text-gray-600 mb-6">
-                  Vous avez parcouru tous les profils disponibles.
+                  You have viewed all available profiles.  
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -76,7 +76,7 @@ export default function SwipePage() {
                   onClick={() => router.push(user.role === 'recruiter' ? '/my-candidates' : '/my-jobs')}
                   className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
                 >
-                  Voir mes sélections
+                  View my selections
                 </motion.button>
               </div>
             </motion.div>

@@ -83,7 +83,7 @@ export function useRecommendations() {
                  };
                })
 
-               // Filter out already swiped items - use backend interactions
+               // Filter out already swiped items - it use backend interactions
                let liked: string[] = []
                let passed: string[] = []
                
@@ -94,7 +94,6 @@ export function useRecommendations() {
                  console.log(`Backend interactions: ${liked.length} liked, ${passed.length} passed`)
                } catch (e) {
                  console.warn("Failed to fetch backend interactions, falling back to localStorage", e)
-                 // Fallback to localStorage if backend fails
                  liked = getLikedItems(user.id, 'job')
                  passed = getPassedItems(user.id, 'job')
                }
