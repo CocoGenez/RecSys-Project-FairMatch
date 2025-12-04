@@ -1,8 +1,0 @@
-{
-  "/jobseeker/swipe/page": "app/jobseeker/swipe/page.js",
-  "/jobseeker/my-jobs/page": "app/jobseeker/my-jobs/page.js",
-  "/login/page": "app/login/page.js",
-  "/register/page": "app/register/page.js",
-  "/page": "app/page.js",
-  "/jobseeker/add-cv/page": "app/jobseeker/add-cv/page.js"
-}
