@@ -11,6 +11,7 @@ router = APIRouter()
 @router.post("/api/parse-resume")
 async def parse_resume(
     file: UploadFile = File(...),
+    user_id: int = Form(...),
     name: str = Form(...),
     gender: str = Form(...),
     interested_domain: str = Form(...),
@@ -37,26 +38,31 @@ async def parse_resume(
     if not parsed_data:
         raise HTTPException(status_code=500, detail="AI parsing failed")
 
-    # 4. Save to PostgreSQL
-    new_user = User(
-        name=name,
-        gender=gender,
-        interested_domain=interested_domain,
-        age=parsed_data.get("Age"),
-        projects=parsed_data.get("Projects"),
-        future_career=parsed_data.get("Future_Career"),
-        python_level=parsed_data.get("Python_Level"),
-        sql_level=parsed_data.get("SQL_Level"),
-        java_level=parsed_data.get("Java_Level")
-    )
+    # 4. Update Existing User in PostgreSQL
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        print(f"[DEBUG] User not found: id={user_id}")
+        raise HTTPException(status_code=404, detail="User not found")
     
-    db.add(new_user)
+    print(f"[DEBUG] Updating user {user.id}: existing email={user.email}")
+
+    # Update fields
+    user.name = name
+    user.gender = gender
+    user.interested_domain = interested_domain
+    user.age = parsed_data.get("Age")
+    user.projects = parsed_data.get("Projects")
+    user.future_career = parsed_data.get("Future_Career")
+    user.python_level = parsed_data.get("Python_Level")
+    user.sql_level = parsed_data.get("SQL_Level")
+    user.java_level = parsed_data.get("Java_Level")
+    
     db.commit()
-    db.refresh(new_user)  # Get the generated ID
+    db.refresh(user)
     
     # 5. Return the saved profile (with ID)
     return {
         "status": "success",
-        "user_id": new_user.id,
+        "user_id": user.id,
         "data": parsed_data
     }
