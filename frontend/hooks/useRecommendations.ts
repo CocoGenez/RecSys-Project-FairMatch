@@ -8,16 +8,7 @@ import { getRecommendations, getUserInteractions } from '@/lib/api'
 export function useRecommendations() {
   const router = useRouter()
   const { user } = useAuth()
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useAuth } from '@/lib/auth'
-import { mockCandidates, mockJobOffers, Candidate, JobOffer } from '@/lib/data'
-import { getLikedItems, getPassedItems } from '@/lib/swipes'
-import { getRecommendations, getUserInteractions } from '@/lib/api'
 
-export function useRecommendations() {
-  const router = useRouter()
-  const { user } = useAuth()
   const [items, setItems] = useState<(Candidate | JobOffer)[]>([])
 
 
