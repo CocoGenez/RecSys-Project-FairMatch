@@ -63,7 +63,7 @@ def recommend(user_id: int, db: Session = Depends(get_db)) -> Dict[str, Any]:
     final_k = 10
     
     # Use low hybrid weight to prioritize content-based relevance
-    HYBRID_WEIGHT = 0.5
+    HYBRID_WEIGHT = 0.2
 
     if user.profile_embedding:
         import torch
