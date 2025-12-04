@@ -76,21 +76,52 @@ def split_skills(val):
     if not val:
         return []
         
-    # 1. Try splitting by the specific pattern: lowercase/paren + space + Uppercase
-    # This handles the "merged sentences" issue (e.g. "development Security")
-    # Regex: Lookbehind for [a-z)] followed by space(s) followed by Lookahead for [A-Z]
-    parts = re.split(r'(?<=[a-z)])\s+(?=[A-Z])', val)
     
-    final_skills = []
-    for p in parts:
-        # 2. For each part, also split by comma if present
-        if "," in p:
-            subs = [s.strip() for s in p.split(",") if s.strip()]
-            final_skills.extend(subs)
-        else:
-            final_skills.append(p.strip())
-            
-    return final_skills
+    skills = []
+    current = []
+    paren_depth = 0
+    s = val
+    length = len(s)
+    for i, ch in enumerate(s):
+        # update parentheses depth
+        if ch == '(':
+            paren_depth += 1
+            current.append(ch)
+            continue
+        if ch == ')':
+            paren_depth = max(0, paren_depth - 1)
+            current.append(ch)
+            continue
+        # If comma and we're NOT inside parentheses, treat as separator
+        if ch == ',' and paren_depth == 0:
+            token = ''.join(current).strip()
+            if token:
+                skills.append(token)
+            current = []
+            continue
+        # Boundary split: space where previous char is lowercase or ')' and next is Uppercase
+        # Only split when not inside parentheses
+        if (
+            ch == ' ' and paren_depth == 0 and
+            i + 1 < length and
+            i - 1 >= 0 and
+            (s[i - 1].islower() or s[i - 1] == ')') and
+            s[i + 1].isupper()
+        ):
+            token = ''.join(current).strip()
+            if token:
+                skills.append(token)
+            current = []
+            # do not include the boundary space
+            continue
+        current.append(ch)
+    # append last token
+    last = ''.join(current).strip()
+    if last:
+        skills.append(last)
+    # final cleanup: strip and remove empty entries
+    final = [t.strip() for t in skills if t and t.strip()]
+    return final
 
 
 def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
@@ -105,31 +136,44 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
     # convert_to_tensor=True renvoie un tensor sur CPU ou GPU selon dispo
     u_emb = model.encode(profile_text, convert_to_tensor=True) # (384,)
 
-    scores = None
+    # 2) Calculer d'abord la similarité Cosine (Content-Based) - C'est notre "Base" cohérente
+    # util.cos_sim attend (N, D) et (M, D) -> renvoie (N, M)
+    cosine_scores = util.cos_sim(u_emb.unsqueeze(0), job_emb)[0]  # (N_jobs,)
     
-    # 2) Predict scores using Classifier if available
+    final_scores = cosine_scores
+
+    # 3) Si le classifieur est dispo, on l'utilise pour "Booster" ou "Affiner" le score
     if classifier is not None:
         try:
             # Expand u_emb to match job_emb size
-            # u_emb: (384,) -> (N, 384)
             u_emb_expanded = u_emb.unsqueeze(0).expand(job_emb.size(0), -1)
             
             # Concatenate (N, 768)
             inputs = torch.cat((u_emb_expanded, job_emb), dim=1)
             
             with torch.no_grad():
-                scores = classifier(inputs).squeeze() # (N,)
+                mlp_scores = classifier(inputs).squeeze() # (N,)
+            
+            # --- HYBRIDATION ---
+            # On combine les deux signaux.
+            # Alpha gère l'équilibre : 
+            # 1.0 = 100% Content-Based (Cohérence max)
+            # 0.0 = 100% Interaction-Based (Personnalisation max)
+            # 0.7 est un bon point de départ pour garder la cohérence tout en personnalisant
+            alpha = 0.3
+            
+            # Normalisation optionnelle si les échelles sont très différentes, 
+            # mais ici Cosine est [-1, 1] et Sigmoid est [0, 1], ça se mélange bien.
+            final_scores = (1 - alpha) * cosine_scores + alpha * mlp_scores
+            
+            print(f"[DEBUG] Hybrid Scoring Applied. Alpha={alpha}")
+            
         except Exception as e:
             print(f"Classifier prediction failed: {e}. Fallback to cosine similarity.")
-            scores = None
+            final_scores = cosine_scores
 
-    # Fallback: Cosine Similarity
-    if scores is None:
-        # util.cos_sim attend (N, D) et (M, D) -> renvoie (N, M)
-        scores = util.cos_sim(u_emb.unsqueeze(0), job_emb)[0]  # (N_jobs,)
-
-    # 3) Top-k indices
-    top_idx = torch.topk(scores, k=top_k).indices.cpu().tolist()
+    # 4) Top-k indices sur le score final
+    top_idx = torch.topk(final_scores, k=top_k).indices.cpu().tolist()
 
     # 4) Récupérer les jobs
     cols = []
