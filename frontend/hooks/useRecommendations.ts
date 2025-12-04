@@ -117,6 +117,7 @@ export function useRecommendations() {
   }, [user, router, refreshTrigger])
 
   const refresh = () => {
+    console.log("[useRecommendations] refresh called")
     setRefreshTrigger(prev => prev + 1)
   }
 

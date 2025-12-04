@@ -14,14 +14,21 @@ export default function SwipePage() {
   const router = useRouter()
   const { logout } = useAuth()
   const { items, user, refresh, isLoading } = useRecommendations()
-  const { isAnimating, handleSwipe, currentItems } = useSwipe(items)
+  
+  // Use callback for reliable triggering
+  const { isAnimating, handleSwipe, currentItems } = useSwipe(items, () => {
+    console.log("[SwipePage] onFinished callback triggered")
+    refresh()
+  })
 
-  // Auto-refresh when items are empty
+  // Auto-refresh fallback (e.g. if items loaded empty)
   useEffect(() => {
-    if (currentItems.length === 0 && !isLoading) {
+    console.log(`[SwipePage] Effect check: currentItems=${currentItems.length}, isLoading=${isLoading}`)
+    if (currentItems.length === 0 && !isLoading && items.length > 0) {
+      console.log("[SwipePage] Triggering refresh from effect...")
       refresh()
     }
-  }, [currentItems.length, isLoading]) // Removed refresh from deps to avoid loop if refresh changes identity (it shouldn't but safe)
+  }, [currentItems.length, isLoading, items.length]) // Removed refresh from deps to avoid loop if refresh changes identity (it shouldn't but safe)
 
   const onSwipe = async (direction: 'left' | 'right') => {
     await handleSwipe(direction)
