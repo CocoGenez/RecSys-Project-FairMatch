@@ -17,11 +17,11 @@ Complete guide for running FairMatch entirely on your local machine with Docker 
 From the project root directory:
 
 ```powershell
-# Start PostgreSQL + Backend
-docker-compose up -d
+# Start PostgreSQL + Backend (using local config)
+docker-compose -f docker-compose.local.yml up -d
 
 # Check that services are running
-docker-compose ps
+docker-compose -f docker-compose.local.yml ps
 ```
 
 Expected output:
@@ -56,7 +56,7 @@ Frontend will be available at: `http://localhost:3000`
 
 ### Database Connection
 
-**Local PostgreSQL credentials** (configured in `docker-compose.yml`):
+**Local PostgreSQL credentials** (configured in `docker-compose.local.yml`):
 ```
 Host: localhost (or 'postgres' inside Docker network)
 Port: 5432
@@ -88,26 +88,26 @@ Schema file: `backend/init.sql`
 
 ```powershell
 # Start all services
-docker-compose up -d
+docker-compose -f docker-compose.local.yml up -d
 
 # Stop all services
-docker-compose down
+docker-compose -f docker-compose.local.yml down
 
 # View logs
-docker-compose logs -f
+docker-compose -f docker-compose.local.yml logs -f
 
 # View logs for specific service
-docker-compose logs -f backend
-docker-compose logs -f postgres
+docker-compose -f docker-compose.local.yml logs -f backend
+docker-compose -f docker-compose.local.yml logs -f postgres
 
 # Restart a service
-docker-compose restart backend
+docker-compose -f docker-compose.local.yml restart backend
 
 # Rebuild after code changes
-docker-compose up -d --build
+docker-compose -f docker-compose.local.yml up -d --build
 
 # Stop and remove volumes (fresh start)
-docker-compose down -v
+docker-compose -f docker-compose.local.yml down -v
 ```
 
 ### Database Access
@@ -144,7 +144,7 @@ SELECT user_id, COUNT(*) FROM interactions GROUP BY user_id;
 1. Edit backend code
 2. Rebuild and restart:
    ```powershell
-   docker-compose up -d --build backend
+   docker-compose -f docker-compose.local.yml up -d --build backend
    ```
 
 ### Making Frontend Changes
@@ -157,10 +157,10 @@ If you modify `backend/init.sql`:
 
 ```powershell
 # Stop and remove database volume
-docker-compose down -v
+docker-compose -f docker-compose.local.yml down -v
 
 # Start fresh (will re-run init.sql)
-docker-compose up -d
+docker-compose -f docker-compose.local.yml up -d
 ```
 
 ---
@@ -211,24 +211,24 @@ curl -X POST http://localhost:8000/auth/register -H "Content-Type: application/j
 
 Check logs:
 ```powershell
-docker-compose logs backend
+docker-compose -f docker-compose.local.yml logs backend
 ```
 
 Common issues:
 - Database not ready → wait 10 seconds and try again
-- Port 8000 in use → stop other services or change port in `docker-compose.yml`
+- Port 8000 in use → stop other services or change port in `docker-compose.local.yml`
 
 ### Database connection failed
 
 Ensure PostgreSQL is running:
 ```powershell
-docker-compose ps postgres
+docker-compose -f docker-compose.local.yml ps postgres
 ```
 
 Should show "Up" status. If not:
 ```powershell
-docker-compose up -d postgres
-docker-compose logs postgres
+docker-compose -f docker-compose.local.yml up -d postgres
+docker-compose -f docker-compose.local.yml logs postgres
 ```
 
 ### Frontend can't connect to backend
@@ -247,8 +247,8 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 
 ```powershell
 # Nuclear option - removes all data
-docker-compose down -v
-docker-compose up -d
+docker-compose -f docker-compose.local.yml down -v
+docker-compose -f docker-compose.local.yml up -d
 ```
 
 ---
@@ -303,7 +303,7 @@ Database: fairmatch_local
 To enable the separate ML service (port 8001):
 
 ```powershell
-docker-compose --profile ml up -d
+docker-compose -f docker-compose.local.yml --profile ml up -d
 ```
 
 This is optional - the main backend already includes recommendation functionality.
@@ -314,15 +314,16 @@ This is optional - the main backend already includes recommendation functionalit
 
 - **Data Persistence**: Database data is stored in a Docker volume (`postgres_data`)
 - **Data is NOT shared** with the cloud deployment (AWS RDS)
-- To reset everything: `docker-compose down -v`
-- Backend code changes require rebuild: `docker-compose up -d --build backend`
+- **Separate configs**: `docker-compose.local.yml` for local dev, `docker-compose.yml` for deployment
+- To reset everything: `docker-compose -f docker-compose.local.yml down -v`
+- Backend code changes require rebuild: `docker-compose -f docker-compose.local.yml up -d --build backend`
 - Frontend has hot-reload - no rebuild needed
 
 ---
 
 ## 🎯 Next Steps
 
-1. ✅ Verify all services are running: `docker-compose ps`
+1. ✅ Verify all services are running: `docker-compose -f docker-compose.local.yml ps`
 2. ✅ Access frontend: http://localhost:3000
 3. ✅ Create a user account
 4. ✅ Upload a resume (uses Gemini API)
@@ -334,7 +335,7 @@ This is optional - the main backend already includes recommendation functionalit
 
 Check logs for errors:
 ```powershell
-docker-compose logs -f
+docker-compose -f docker-compose.local.yml logs -f
 ```
 
 Connect to database:
