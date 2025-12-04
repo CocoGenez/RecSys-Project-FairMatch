@@ -199,7 +199,7 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                       <h3 className="text-xl font-bold text-gray-800 mb-4">Langues</h3>
                       <div className="flex flex-wrap gap-2">
                         {candidate.cvFormData.languages.map((lang, idx) => {
-                          // Gérer les anciennes données (string) et les nouvelles (Language)
+                          // Handle old data (string) and new data (Language)
                           const languageName = typeof lang === 'string' ? lang : lang.name
                           const languageLevel = typeof lang === 'string' ? null : lang.level
                           
