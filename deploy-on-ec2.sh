@@ -19,7 +19,7 @@ fi
 echo -e "${YELLOW}⚙️  Clonage du repository...${NC}"
 git clone https://github.com/CocoGenez/RecSys-Project-FairMatch.git
 cd RecSys-Project-FairMatch
-git checkout Paul
+git checkout main
 
 echo -e "${GREEN}✅ Repository cloné${NC}"
 
