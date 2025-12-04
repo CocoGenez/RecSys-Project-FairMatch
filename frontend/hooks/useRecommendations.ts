@@ -8,7 +8,14 @@ import { getRecommendations, getUserInteractions } from '@/lib/api'
 export function useRecommendations() {
   const router = useRouter()
   const { user } = useAuth()
+
   const [items, setItems] = useState<(Candidate | JobOffer)[]>([])
+
+
+
+  // Refactored version below
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (!user) {
@@ -21,7 +28,8 @@ export function useRecommendations() {
     }
 
     const fetchData = async () => {
-      // Charger les items selon le rôle
+      setIsLoading(true)
+      // Load items with their roles
       if (user.role === 'recruiter') {
         console.log("Fetching recruiter items")
         const liked = getLikedItems(user.id, 'candidate')
@@ -30,6 +38,7 @@ export function useRecommendations() {
           c => !liked.includes(c.id) && !passed.includes(c.id)
         )
         setItems(available)
+        setIsLoading(false)
       } else {
         console.log("Fetching jobseeker items for user:", user)
 
@@ -83,6 +92,7 @@ export function useRecommendations() {
                  };
                })
 
+<<<<<<< HEAD
                // Filter out already swiped items - it use backend interactions
                let liked: string[] = []
                let passed: string[] = []
@@ -103,6 +113,11 @@ export function useRecommendations() {
                )
 
                setItems(filteredJobs)
+=======
+               // Backend now handles filtering of seen items!
+               setItems(adaptedJobs)
+               setIsLoading(false)
+>>>>>>> 667545c834520350fe40d50a05cce0b9293a0bc8
                return
              }
           }
@@ -117,11 +132,17 @@ export function useRecommendations() {
           j => !liked.includes(j.id) && !passed.includes(j.id)
         )
         setItems(available)
+        setIsLoading(false)
       }
     }
 
     fetchData()
-  }, [user, router])
+  }, [user, router, refreshTrigger])
 
-  return { items, user }
+  const refresh = () => {
+    console.log("[useRecommendations] refresh called")
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  return { items, user, refresh, isLoading }
 }

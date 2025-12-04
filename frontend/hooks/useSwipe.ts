@@ -1,13 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/lib/auth'
 import { saveSwipe as saveSwipeLocal } from '@/lib/swipes'
 import { Candidate, JobOffer } from '@/lib/data'
 import { saveInteraction } from '@/lib/api'
 
-export function useSwipe(items: (Candidate | JobOffer)[]) {
+export function useSwipe(items: (Candidate | JobOffer)[], onFinished?: () => void) {
   const { user } = useAuth()
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)
+
+  // Reset index when items change (e.g. refresh)
+  useEffect(() => {
+    setCurrentIndex(0)
+  }, [items])
 
   const handleSwipe = async (direction: 'left' | 'right') => {
     if (isAnimating || currentIndex >= items.length) return
@@ -42,7 +47,14 @@ export function useSwipe(items: (Candidate | JobOffer)[]) {
     }
 
     setTimeout(() => {
-      setCurrentIndex(prev => prev + 1)
+      setCurrentIndex(prev => {
+        const newIndex = prev + 1
+        if (newIndex >= items.length) {
+          // Trigger finished callback
+          onFinished && onFinished()
+        }
+        return newIndex
+      })
       setIsAnimating(false)
     }, 300)
   }

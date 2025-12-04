@@ -25,6 +25,9 @@ class User(Base):
     python_level = Column(String)
     sql_level = Column(String)
     java_level = Column(String)
+    
+    # Online Learning
+    profile_embedding = Column(JSON, nullable=True) # Stores the 384-dim vector as a list
 
 class Interaction(Base):
     __tablename__ = "interactions"

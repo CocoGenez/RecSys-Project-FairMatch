@@ -10,3 +10,4 @@ psycopg2-binary
 sentence-transformers
 pandas
 pyarrow
+psycopg2-binary

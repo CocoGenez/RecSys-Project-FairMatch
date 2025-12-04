@@ -26,6 +26,41 @@ def create_interaction(interaction: InteractionCreate, db: Session = Depends(get
     db.add(db_interaction)
     db.commit()
     db.refresh(db_interaction)
+
+    # --- Online Learning Hook ---
+    if interaction.type == "job" and interaction.action == "like":
+        try:
+            from lib.models import User
+            from models.base_model import update_user_profile_vector, model
+            import torch
+
+            user = db.query(User).filter(User.id == interaction.user_id).first()
+            if user:
+                # 1. Get current vector
+                current_emb = None
+                if user.profile_embedding:
+                    current_emb = torch.tensor(user.profile_embedding)
+                else:
+                    # Fallback: compute from text (re-construct text logic or just skip?)
+                    # Ideally we should have the initial embedding. 
+                    # For now, let's skip if no initial embedding (or maybe we can trigger a re-compute?)
+                    # Let's try to re-compute if possible, or just log warning.
+                    print(f"[WARN] User {user.id} has no profile_embedding. Skipping update.")
+                
+                if current_emb is not None:
+                    # 2. Update vector
+                    print(f"[INFO] Updating profile for User {user.id} with Job {interaction.item_id}")
+                    new_emb = update_user_profile_vector(current_emb, interaction.item_id, alpha=0.1)
+                    
+                    # 3. Save back to DB
+                    user.profile_embedding = new_emb.tolist()
+                    db.commit()
+                    print(f"[SUCCESS] User {user.id} profile updated.")
+                    
+        except Exception as e:
+            print(f"[ERROR] Failed to update user profile: {e}")
+    # ----------------------------
+
     return {"status": "success", "id": db_interaction.id}
 
 @router.get("/api/interactions/{user_id}")

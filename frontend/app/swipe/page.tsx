@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -12,8 +13,28 @@ import { useSwipe } from '@/hooks/useSwipe'
 export default function SwipePage() {
   const router = useRouter()
   const { logout } = useAuth()
-  const { items, user } = useRecommendations()
-  const { isAnimating, handleSwipe, currentItems } = useSwipe(items)
+  const { items, user, refresh, isLoading } = useRecommendations()
+  
+  // Use callback for reliable triggering
+  const { isAnimating, handleSwipe, currentItems } = useSwipe(items, () => {
+    console.log("[SwipePage] onFinished callback triggered")
+    refresh()
+  })
+
+  // Auto-refresh fallback (e.g. if items loaded empty)
+  useEffect(() => {
+    console.log(`[SwipePage] Effect check: currentItems=${currentItems.length}, isLoading=${isLoading}`)
+    if (currentItems.length === 0 && !isLoading && items.length > 0) {
+      console.log("[SwipePage] Triggering refresh from effect...")
+      refresh()
+    }
+  }, [currentItems.length, isLoading, items.length]) // Removed refresh from deps to avoid loop if refresh changes identity (it shouldn't but safe)
+
+  const onSwipe = async (direction: 'left' | 'right') => {
+    await handleSwipe(direction)
+    // We don't refresh on every swipe anymore.
+    // We wait until the list is empty (handled by the empty state view)
+  }
 
   const handleLogout = () => {
     logout()
@@ -58,7 +79,21 @@ export default function SwipePage() {
 
         {/* Zone de swipe */}
         <div className="relative h-[600px] mb-6">
-          {currentItems.length === 0 ? (
+          {isLoading ? (
+             <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0 flex items-center justify-center bg-white rounded-3xl shadow-xl"
+            >
+              <div className="text-center p-8">
+                <div className="text-6xl mb-4 animate-bounce">🔄</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Chargement...</h2>
+                <p className="text-gray-600">
+                  Recherche de nouvelles recommandations...
+                </p>
+              </div>
+            </motion.div>
+          ) : currentItems.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -68,15 +103,23 @@ export default function SwipePage() {
                 <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">No more profiles!</h2>
                 <p className="text-gray-600 mb-6">
+<<<<<<< HEAD
                   You have viewed all available profiles.  
+=======
+                  Vous avez vu cette série de profils.
+>>>>>>> 667545c834520350fe40d50a05cce0b9293a0bc8
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => router.push(user.role === 'recruiter' ? '/my-candidates' : '/my-jobs')}
+                  onClick={() => refresh()}
                   className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
                 >
+<<<<<<< HEAD
                   View my selections
+=======
+                  Réessayer
+>>>>>>> 667545c834520350fe40d50a05cce0b9293a0bc8
                 </motion.button>
               </div>
             </motion.div>
@@ -87,7 +130,7 @@ export default function SwipePage() {
                   key={item.id}
                   candidate={user.role === 'recruiter' ? (item as Candidate) : undefined}
                   jobOffer={user.role === 'jobseeker' ? (item as JobOffer) : undefined}
-                  onSwipe={handleSwipe}
+                  onSwipe={onSwipe}
                   index={index}
                 />
               ))}
@@ -105,7 +148,7 @@ export default function SwipePage() {
             <motion.button
               whileHover={{ scale: 1.1, rotate: -10 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => handleSwipe('left')}
+              onClick={() => onSwipe('left')}
               disabled={isAnimating}
               className="w-16 h-16 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-red-200 hover:border-red-400 transition-colors disabled:opacity-50"
             >
@@ -114,7 +157,7 @@ export default function SwipePage() {
             <motion.button
               whileHover={{ scale: 1.1, rotate: 10 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => handleSwipe('right')}
+              onClick={() => onSwipe('right')}
               disabled={isAnimating}
               className="w-16 h-16 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-green-200 hover:border-green-400 transition-colors disabled:opacity-50"
             >

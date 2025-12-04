@@ -1,1 +1,0 @@
-['job id', 'experience', 'qualifications', 'salary range', 'location', 'country', 'latitude', 'longitude', 'work type', 'company size', 'job posting date', 'preference', 'contact person', 'contact', 'job title', 'role', 'job portal', 'job description', 'benefits', 'skills', 'responsibilities', 'company', 'company profile', 'companybucket', 'JobText']
