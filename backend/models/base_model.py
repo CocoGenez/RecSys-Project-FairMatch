@@ -26,7 +26,7 @@ class RecSysClassifier(torch.nn.Module):
         x = self.fc3(x)
         return self.sigmoid(x)
 
-# Charger les artefacts déjà calculés
+# Load pre-calculated artifacts
 try:
     job_emb  = torch.load(processed_dir / "job_embeddings.pt")       # (N_jobs, 384)
     jobs     = pd.read_parquet(processed_dir / "jobs_sample.parquet")
@@ -54,7 +54,7 @@ except Exception as e:
     jobs = None
     classifier = None
 
-# Charger le modèle de sentence embedding
+# Load sentence embedding model
 try:
     model = SentenceTransformer("all-MiniLM-L6-v2")
     print("SentenceTransformer loaded.")
@@ -187,7 +187,7 @@ def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None, hybrid_weight=0.0
     if job_emb is None or jobs is None:
         return []
 
-    # 2) Calculer d'abord la similarité Cosine (Content-Based)
+    # 2) First, calculate Cosine similarity (Content-Based)
     cosine_scores = util.cos_sim(u_emb.unsqueeze(0), job_emb)[0]  # (N_jobs,)
     
     final_scores = cosine_scores

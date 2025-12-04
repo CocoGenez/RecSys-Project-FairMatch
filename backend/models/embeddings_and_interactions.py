@@ -6,18 +6,18 @@ from pathlib import Path
 
 project_root = Path(__file__).parent
 
-# 1. Charger les données propres
+# 1. Load clean data
 students = pd.read_parquet(project_root / "students.parquet")
 jobs = pd.read_parquet(project_root / "jobs.parquet")
 
-# 2. GRAND SAMPLE : on prend 20 000 jobs pour garder de la diversité
+# 2. LARGE SAMPLE: take 20,000 jobs to maintain diversity
 sample_size = min(20000, len(jobs))
 jobs_sample = jobs.sample(n=sample_size, random_state=42).reset_index(drop=True)
 
 print("Students:", students.shape)
-print("Jobs sample (avant texte):", jobs_sample.shape)
+print("Jobs sample (before text):", jobs_sample.shape)
 
-# 3. Construire le texte de job pour les embeddings
+# 3. Build job text for embeddings
 def build_job_text(row):
     return (
         f"title {row.get('job title', '')}. "
@@ -32,7 +32,7 @@ jobs_sample["JobText"] = jobs_sample.apply(build_job_text, axis=1)
 
 print("Jobs sample (avec JobText):", jobs_sample.shape)
 
-# 4. Encoder avec SentenceTransformer
+# 4. Encode with SentenceTransformer
 model = SentenceTransformer("all-MiniLM-L6-v2")
 
 user_emb = model.encode(
@@ -47,13 +47,13 @@ job_emb = model.encode(
     show_progress_bar=True,
 )
 
-# 5. Construire les interactions positives / négatives
+# 5. Build positive/negative interactions
 user_ids = students.index.to_list()
 job_ids = jobs_sample.index.to_list()
 
 interactions = []
 
-# Positifs : top-10 jobs par similarité
+# Positives: top-10 jobs by similarity
 for i, uvec in enumerate(user_emb):
     sims = util.cos_sim(uvec, job_emb)[0]
     topk = torch.topk(sims, k=10)
@@ -64,7 +64,7 @@ for i, uvec in enumerate(user_emb):
         jid = job_ids[int(j_idx)]
         interactions.append({"UserId": int(uid), "JobId": int(jid), "Label": 1})
 
-# Négatifs : 10 jobs aléatoires par user
+# Negatives: 10 random jobs per user
 for uid in user_ids:
     negative_choices = np.random.choice(job_ids, size=10, replace=False)
     for jid in negative_choices:
@@ -72,7 +72,7 @@ for uid in user_ids:
 
 inter_df = pd.DataFrame(interactions)
 
-# 6. Mélange + split train/val/test
+# 6. Shuffle + split train/val/test
 inter_df = inter_df.sample(frac=1, random_state=42).reset_index(drop=True)
 
 n = len(inter_df)
@@ -89,7 +89,7 @@ inter_df["Split"] = splits
 
 print(inter_df["Split"].value_counts(normalize=True))
 
-# 7. Sauvegarde des artefacts
+# 7. Save artifacts
 inter_df.to_parquet(project_root / "interactions.parquet", index=False)
 jobs_sample.to_parquet(project_root / "jobs_sample.parquet", index=False)
 
