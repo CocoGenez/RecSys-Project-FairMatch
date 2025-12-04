@@ -237,10 +237,13 @@ def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None):
     # -----------------------
 
     # 4) Top-k indices
-    top_idx = torch.topk(final_scores, k=top_k).indices.cpu().tolist()
+    # We want to return scores too.
+    top_k_result = torch.topk(final_scores, k=top_k)
+    top_idx = top_k_result.indices.cpu().tolist()
+    top_scores = top_k_result.values.cpu().tolist()
 
     # 5) Retrieve Jobs
-    return _get_jobs_from_indices(top_idx)
+    return _get_jobs_from_indices(top_idx, top_scores)
 
 
 def recommend_from_text(profile_text: str, top_k: int = 5, exclude_ids=None) -> tuple:
@@ -260,10 +263,14 @@ def recommend_from_text(profile_text: str, top_k: int = 5, exclude_ids=None) -> 
     return recos, u_emb
 
 
-def _get_jobs_from_indices(indices):
+def _get_jobs_from_indices(indices, scores=None):
     results = []
     recos_df = jobs.iloc[indices].copy()
     
+    # If scores provided, add them to the dataframe temporarily to iterate easily
+    if scores is not None:
+        recos_df['__score__'] = scores
+
     for idx, row in recos_df.iterrows():
         raw_id = row.get("job id")
         final_id = str(raw_id) if raw_id and str(raw_id).lower() != "nan" else str(idx)
@@ -283,7 +290,8 @@ def _get_jobs_from_indices(indices):
             "company_bucket": row.get("companybucket", "Unknown"),
             "benefits": row.get("benefits", "Not specified"),
             "company_profile": row.get("company profile", "{}"),
-            "description": row.get("job description", "")
+            "description": row.get("job description", ""),
+            "score": float(row.get("__score__", 0.0))
         }
         results.append(job_dict)
     return results
