@@ -135,8 +135,8 @@ def update_user_profile_vector(user_vector, job_id, alpha=0.1):
     job_idx = -1
     
     # Try to find by column
-    if 'jobid' in jobs.columns:
-        matches = jobs.index[jobs['jobid'].astype(str) == str(job_id)].tolist()
+    if 'job id' in jobs.columns:
+        matches = jobs.index[jobs['job id'].astype(str) == str(job_id)].tolist()
         if matches:
             # If index is integer and matches row number
             # But wait, job_emb is aligned with jobs rows.
@@ -148,7 +148,7 @@ def update_user_profile_vector(user_vector, job_id, alpha=0.1):
             
             # Reset index to be safe? No, that might be expensive.
             # Let's use numpy to find the index
-            vals = jobs['jobid'].astype(str).values
+            vals = jobs['job id'].astype(str).values
             indices = (vals == str(job_id)).nonzero()[0]
             if len(indices) > 0:
                 job_idx = indices[0]
@@ -231,7 +231,7 @@ def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None):
         # jobs['jobid'].isin(exclude_ids) -> boolean mask
         # indices = mask.nonzero()
         
-        mask = jobs['jobid'].astype(str).isin(exclude_set).values
+        mask = jobs['job id'].astype(str).isin(exclude_set).values
         # Set scores of masked items to -infinity
         final_scores[torch.tensor(mask, dtype=torch.bool)] = -float('inf')
     # -----------------------
@@ -265,7 +265,7 @@ def _get_jobs_from_indices(indices):
     recos_df = jobs.iloc[indices].copy()
     
     for idx, row in recos_df.iterrows():
-        raw_id = row.get("jobid")
+        raw_id = row.get("job id")
         final_id = str(raw_id) if raw_id and str(raw_id).lower() != "nan" else str(idx)
 
         job_dict = {
