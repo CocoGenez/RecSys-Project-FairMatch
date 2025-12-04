@@ -17,13 +17,8 @@ export default function SwipePage() {
 
   const onSwipe = async (direction: 'left' | 'right') => {
     await handleSwipe(direction)
-    if (direction === 'right') {
-      // Refresh recommendations after a like
-      // Small delay to let the animation finish/backend update
-      setTimeout(() => {
-        refresh()
-      }, 500)
-    }
+    // We don't refresh on every swipe anymore.
+    // We wait until the list is empty (handled by the empty state view)
   }
 
   const handleLogout = () => {
@@ -79,15 +74,15 @@ export default function SwipePage() {
                 <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Plus de profils !</h2>
                 <p className="text-gray-600 mb-6">
-                  Vous avez parcouru tous les profils disponibles.
+                  Vous avez vu cette série de profils.
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => router.push(user.role === 'recruiter' ? '/my-candidates' : '/my-jobs')}
+                  onClick={() => refresh()}
                   className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
                 >
-                  Voir mes sélections
+                  Charger plus de profils
                 </motion.button>
               </div>
             </motion.div>

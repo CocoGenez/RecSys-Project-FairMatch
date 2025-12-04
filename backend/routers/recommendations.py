@@ -45,17 +45,29 @@ def recommend(user_id: int, db: Session = Depends(get_db)) -> Dict[str, Any]:
     
     print(f"[INFO] Generating recommendations for User {user_id} with profile: {profile_text[:100]}...")
 
+    # 2.5 Get Seen Jobs (Likes and Passes)
+    from lib.models import Interaction
+    interactions = db.query(Interaction).filter(
+        Interaction.user_id == user_id,
+        Interaction.type == "job"
+    ).all()
+    seen_ids = [i.item_id for i in interactions]
+    
+    print(f"[INFO] User {user_id} has seen {len(seen_ids)} jobs. Excluding them.")
+
     # 3. Get Recommendations from Model
     # Check if we have a stored embedding (from online learning)
+    limit = 10 # Batch size
+    
     if user.profile_embedding:
         import torch
         from models.base_model import recommend_from_embedding
         print(f"[INFO] Using stored profile embedding for User {user_id}")
         u_emb = torch.tensor(user.profile_embedding)
-        recommended_jobs = recommend_from_embedding(u_emb, top_k=100)
+        recommended_jobs = recommend_from_embedding(u_emb, top_k=limit, exclude_ids=seen_ids)
     else:
         # Fallback to text-based
-        recommended_jobs, u_emb = recommend_from_text(profile_text, top_k=100)
+        recommended_jobs, u_emb = recommend_from_text(profile_text, top_k=limit, exclude_ids=seen_ids)
         
         # Save this initial embedding to DB so we can update it later!
         if u_emb is not None:

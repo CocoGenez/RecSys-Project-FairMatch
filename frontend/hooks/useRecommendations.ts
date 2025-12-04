@@ -88,27 +88,9 @@ export function useRecommendations() {
                  };
                })
 
-               // Filter out already swiped items - use backend interactions
-               let liked: string[] = []
-               let passed: string[] = []
-               
-               try {
-                 const interactions = await getUserInteractions(parseInt(userId))
-                 liked = interactions.liked
-                 passed = interactions.passed
-                 console.log(`Backend interactions: ${liked.length} liked, ${passed.length} passed`)
-               } catch (e) {
-                 console.warn("Failed to fetch backend interactions, falling back to localStorage", e)
-                 // Fallback to localStorage if backend fails
-                 liked = getLikedItems(user.id, 'job')
-                 passed = getPassedItems(user.id, 'job')
-               }
-               
-               const filteredJobs = adaptedJobs.filter(
-                 job => !liked.includes(job.id) && !passed.includes(job.id)
-               )
-
-               setItems(filteredJobs)
+               // Backend now handles filtering of seen items!
+               setItems(adaptedJobs)
+               return
                return
              }
           }

@@ -176,9 +176,10 @@ def update_user_profile_vector(user_vector, job_id, alpha=0.1):
     return new_vector
 
 
-def recommend_from_embedding(u_emb, top_k=5):
+def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None):
     """
     Generate recommendations from a pre-computed (and potentially updated) user embedding.
+    exclude_ids: list of job_ids (str) to exclude from results.
     """
     if job_emb is None or jobs is None:
         return []
@@ -205,6 +206,36 @@ def recommend_from_embedding(u_emb, top_k=5):
             print(f"Classifier prediction failed: {e}")
             final_scores = cosine_scores
 
+    # --- EXCLUSION LOGIC ---
+    if exclude_ids:
+        # We need to find indices of these IDs and set their score to -inf
+        # This is a bit slow if exclude_ids is large and we do it naively.
+        # Assuming jobs['jobid'] corresponds to the rows.
+        
+        # Create a mask?
+        # Let's map job_id -> index once? No, jobs is global.
+        # Let's do a quick lookup.
+        # jobs['jobid'] might be strings or ints.
+        
+        # Optimization: Pre-compute a map if possible, but for now:
+        # Filter by boolean mask on dataframe is easy but we need indices for tensor.
+        
+        # Let's assume exclude_ids is a set of strings
+        exclude_set = set(str(x) for x in exclude_ids)
+        
+        # We need to mask 'final_scores' at specific indices.
+        # Iterating over all jobs to check membership is O(N).
+        # N is ~20k? It's fine.
+        
+        # Vectorized approach:
+        # jobs['jobid'].isin(exclude_ids) -> boolean mask
+        # indices = mask.nonzero()
+        
+        mask = jobs['jobid'].astype(str).isin(exclude_set).values
+        # Set scores of masked items to -infinity
+        final_scores[torch.tensor(mask, dtype=torch.bool)] = -float('inf')
+    # -----------------------
+
     # 4) Top-k indices
     top_idx = torch.topk(final_scores, k=top_k).indices.cpu().tolist()
 
@@ -212,7 +243,7 @@ def recommend_from_embedding(u_emb, top_k=5):
     return _get_jobs_from_indices(top_idx)
 
 
-def recommend_from_text(profile_text: str, top_k: int = 5) -> tuple:
+def recommend_from_text(profile_text: str, top_k: int = 5, exclude_ids=None) -> tuple:
     """
     Generates recommendations and returns the initial user embedding.
     Returns: (recommendations_list, user_embedding_tensor)
@@ -224,7 +255,7 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> tuple:
     u_emb = model.encode(profile_text, convert_to_tensor=True) # (384,)
     
     # 2) Recommend
-    recos = recommend_from_embedding(u_emb, top_k)
+    recos = recommend_from_embedding(u_emb, top_k, exclude_ids=exclude_ids)
     
     return recos, u_emb
 
