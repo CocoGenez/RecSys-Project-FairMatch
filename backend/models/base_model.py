@@ -289,6 +289,51 @@ def _get_jobs_from_indices(indices):
     return results
 
 
+def get_job_details(job_ids):
+    """
+    Retrieve job details for a list of job IDs.
+    """
+    if jobs is None:
+        return []
+        
+    results = []
+    # Convert IDs to string for comparison
+    target_ids = set(str(jid) for jid in job_ids)
+    
+    # Filter dataframe
+    # This might be slow if we iterate.
+    # Let's use isin
+    
+    if 'job id' in jobs.columns:
+        mask = jobs['job id'].astype(str).isin(target_ids)
+        filtered_jobs = jobs[mask]
+        
+        for idx, row in filtered_jobs.iterrows():
+            raw_id = row.get("job id")
+            final_id = str(raw_id) if raw_id and str(raw_id).lower() != "nan" else str(idx)
+            
+            job_dict = {
+                "job_id": final_id,
+                "title": row.get("job title", "Unknown Title"),
+                "role": row.get("role", "Unknown Role"),
+                "company": row.get("company", "Unknown Company"),
+                "location": row.get("location", "Remote"),
+                "country": row.get("country", "Unknown Country"),
+                "skills": split_skills(row.get("skills", "")),
+                "salary_range": row.get("salary_range", "Competitive"),
+                "experience": row.get("experience", "Not specified"),
+                "qualifications": row.get("qualifications", "Not specified"),
+                "work_type": row.get("work type", "Full-time"),
+                "company_bucket": row.get("companybucket", "Unknown"),
+                "benefits": row.get("benefits", "Not specified"),
+                "company_profile": row.get("company profile", "{}"),
+                "description": row.get("job description", "")
+            }
+            results.append(job_dict)
+            
+    return results
+
+
 if __name__ == "__main__":
     test_text = "python developer machine learning sql data science"
     print("--- Initial Recommendation ---")
