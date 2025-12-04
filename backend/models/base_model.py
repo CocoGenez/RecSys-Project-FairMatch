@@ -29,7 +29,7 @@ class RecSysClassifier(torch.nn.Module):
 # Charger les artefacts déjà calculés
 try:
     job_emb  = torch.load(processed_dir / "job_embeddings.pt")       # (N_jobs, 384)
-    jobs     = pd.read_parquet(processed_dir / "jobs.parquet")
+    jobs     = pd.read_parquet(processed_dir / "jobs_sample.parquet")
     
     # Load classifier
     classifier = RecSysClassifier()
