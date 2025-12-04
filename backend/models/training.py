@@ -16,7 +16,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 # Define paths
 root = Path(__file__).parent
 processed_dir = root.parent / "Processed"
-interactions_path = processed_dir / "interactions_augmented.csv" # "interactions_export.csv pour le dataset original, interactions_augmented.csv"
+interactions_path = processed_dir / "interactions_export.csv" # "interactions_export.csv pour le dataset original, interactions_augmented.csv"
 users_path = processed_dir / "users_export.csv"
 jobs_path = processed_dir / "jobs.parquet"
 job_emb_path = processed_dir / "job_embeddings.pt"
@@ -80,7 +80,7 @@ def build_user_profile_text(row):
         f"skills python {safe_str(row.get('Python_Level', ''))}, sql {safe_str(row.get('SQL_Level', ''))}, java {safe_str(row.get('Java_Level', ''))}."
     )
 
-def train_model(epochs=50, batch_size=32, lr=0.001):
+def train_model(epochs=20, batch_size=32, lr=0.001):
     print("Loading data...")
     
     # Load Data
