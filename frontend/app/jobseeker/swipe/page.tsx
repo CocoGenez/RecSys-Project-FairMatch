@@ -14,13 +14,27 @@ import { useSwipe } from '@/hooks/useSwipe'
 export default function JobseekerSwipePage() {
   const router = useRouter()
   const { user, logout } = useAuth()
-  const { items } = useRecommendations()
-  const { isAnimating, handleSwipe, currentItems, currentIndex } = useSwipe(items)
+  const { items, refresh, isLoading } = useRecommendations()
+  
+  // Use callback for reliable triggering
+  const { isAnimating, handleSwipe, currentItems, currentIndex } = useSwipe(items, () => {
+    console.log("[JobseekerSwipePage] onFinished callback triggered")
+    refresh()
+  })
+
+  // Auto-refresh fallback
+  useEffect(() => {
+    if (currentItems.length === 0 && !isLoading && items.length > 0) {
+      console.log("[JobseekerSwipePage] Triggering refresh from effect...")
+      refresh()
+    }
+  }, [currentItems.length, isLoading, items.length])
   
   console.log("SwipePage render:", { 
     totalItems: items.length, 
     currentItemsLength: currentItems.length, 
-    currentIndex
+    currentIndex,
+    isLoading
   })
 
   const [selectedJob, setSelectedJob] = useState<JobOfferType | null>(null)
@@ -112,7 +126,21 @@ export default function JobseekerSwipePage() {
 
         {/* Swipe Zone - Full height with side buttons */}
         <div className="flex-1 relative flex items-center justify-center min-h-0">
-          {adaptedCurrentJobs.length === 0 ? (
+          {isLoading ? (
+             <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0 flex items-center justify-center bg-white rounded-3xl shadow-xl"
+            >
+              <div className="text-center p-8">
+                <div className="text-6xl mb-4 animate-bounce">🔄</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Loading...</h2>
+                <p className="text-gray-600">
+                  Finding the best jobs for you...
+                </p>
+              </div>
+            </motion.div>
+          ) : adaptedCurrentJobs.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -124,14 +152,24 @@ export default function JobseekerSwipePage() {
                 <p className="text-gray-600 mb-6">
                   You have browsed all available offers.
                 </p>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => router.push('/jobseeker/my-jobs')}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold shadow-lg"
-                >
-                  View my saved jobs
-                </motion.button>
+                <div className="flex flex-col gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => router.push('/jobseeker/my-jobs')}
+                    className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-semibold shadow-lg"
+                  >
+                    View my saved jobs
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => refresh()}
+                    className="px-6 py-3 bg-gray-100 text-gray-600 rounded-full font-semibold hover:bg-gray-200 transition-colors"
+                  >
+                    Try to load more
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
           ) : (
