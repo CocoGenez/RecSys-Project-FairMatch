@@ -46,7 +46,25 @@ def recommend(user_id: int, db: Session = Depends(get_db)) -> Dict[str, Any]:
     print(f"[INFO] Generating recommendations for User {user_id} with profile: {profile_text[:100]}...")
 
     # 3. Get Recommendations from Model
-    recommended_jobs, _ = recommend_from_text(profile_text, top_k=100)
+    # Check if we have a stored embedding (from online learning)
+    if user.profile_embedding:
+        import torch
+        from models.base_model import recommend_from_embedding
+        print(f"[INFO] Using stored profile embedding for User {user_id}")
+        u_emb = torch.tensor(user.profile_embedding)
+        recommended_jobs = recommend_from_embedding(u_emb, top_k=100)
+    else:
+        # Fallback to text-based
+        recommended_jobs, u_emb = recommend_from_text(profile_text, top_k=100)
+        
+        # Save this initial embedding to DB so we can update it later!
+        if u_emb is not None:
+            try:
+                user.profile_embedding = u_emb.tolist()
+                db.commit()
+                print(f"[INFO] Initial profile embedding saved for User {user_id}")
+            except Exception as e:
+                print(f"[WARN] Could not save initial embedding: {e}")
     
     print(f"[INFO] Generated {len(recommended_jobs)} recommendations for User {user_id}")
 
