@@ -27,9 +27,7 @@ class RecSysClassifier(torch.nn.Module):
         return self.sigmoid(x)
 
 # Charger les artefacts déjà calculés
-# On utilise try/except pour éviter que ça plante si les fichiers n'existent pas encore (dev mode)
 try:
-    # user_emb = torch.load(processed_dir / "user_embeddings.pt")      # (180, 384) - Pas nécessaire pour les nouveaux users
     job_emb  = torch.load(processed_dir / "job_embeddings.pt")       # (N_jobs, 384)
     jobs     = pd.read_parquet(processed_dir / "jobs.parquet")
     
@@ -56,7 +54,7 @@ except Exception as e:
     jobs = None
     classifier = None
 
-# Charger le modèle de sentence embedding pour les nouveaux users
+# Charger le modèle de sentence embedding
 try:
     model = SentenceTransformer("all-MiniLM-L6-v2")
     print("SentenceTransformer loaded.")
@@ -68,7 +66,6 @@ except Exception as e:
 def split_skills(val):
     """
     Robustly split skills string into a list.
-    Handles comma-separated values and space-separated sentences/capitalized words.
     """
     if not isinstance(val, str):
         return []
@@ -76,14 +73,12 @@ def split_skills(val):
     if not val:
         return []
         
-    
     skills = []
     current = []
     paren_depth = 0
     s = val
     length = len(s)
     for i, ch in enumerate(s):
-        # update parentheses depth
         if ch == '(':
             paren_depth += 1
             current.append(ch)
@@ -92,15 +87,12 @@ def split_skills(val):
             paren_depth = max(0, paren_depth - 1)
             current.append(ch)
             continue
-        # If comma and we're NOT inside parentheses, treat as separator
         if ch == ',' and paren_depth == 0:
             token = ''.join(current).strip()
             if token:
                 skills.append(token)
             current = []
             continue
-        # Boundary split: space where previous char is lowercase or ')' and next is Uppercase
-        # Only split when not inside parentheses
         if (
             ch == ' ' and paren_depth == 0 and
             i + 1 < length and
@@ -112,151 +104,138 @@ def split_skills(val):
             if token:
                 skills.append(token)
             current = []
-            # do not include the boundary space
             continue
         current.append(ch)
-    # append last token
     last = ''.join(current).strip()
     if last:
         skills.append(last)
-    # final cleanup: strip and remove empty entries
-    final = [t.strip() for t in skills if t and t.strip()]
-    return final
+    return [t.strip() for t in skills if t and t.strip()]
 
 
-def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
+def update_user_profile_vector(user_vector, job_id, alpha=0.1):
     """
-    Génère des recommandations pour un texte de profil donné (Cold Start).
+    Pseudo Online Learning:
+    Updates the user vector by moving it slightly towards the vector of the liked job.
+    
+    Args:
+        user_vector (torch.Tensor): Current user embedding (384,)
+        job_id (str): ID of the job that was liked
+        alpha (float): Learning rate (0.0 to 1.0). How much to adapt.
+        
+    Returns:
+        torch.Tensor: Updated user vector (normalized)
     """
-    if model is None or job_emb is None or jobs is None:
-        print("Error: Model or data not loaded.")
+    if job_emb is None or jobs is None:
+        return user_vector
+
+    # Find job index
+    # Assuming jobs dataframe has 'jobid' column or index matches
+    # We need to find the row index in 'jobs' which corresponds to 'job_emb' index
+    
+    job_idx = -1
+    
+    # Try to find by column
+    if 'jobid' in jobs.columns:
+        matches = jobs.index[jobs['jobid'].astype(str) == str(job_id)].tolist()
+        if matches:
+            # If index is integer and matches row number
+            # But wait, job_emb is aligned with jobs rows.
+            # We need the integer position (iloc)
+            # If index is not range(N), we need to find the integer location
+            
+            # Let's assume jobs.index is NOT reliable for position if it was set to jobid
+            # We need the integer position of the row where jobid == job_id
+            
+            # Reset index to be safe? No, that might be expensive.
+            # Let's use numpy to find the index
+            vals = jobs['jobid'].astype(str).values
+            indices = (vals == str(job_id)).nonzero()[0]
+            if len(indices) > 0:
+                job_idx = indices[0]
+    
+    if job_idx == -1:
+        # Fallback: maybe job_id IS the index (if it's an int)
+        if str(job_id).isdigit():
+            idx = int(job_id)
+            if 0 <= idx < len(jobs):
+                job_idx = idx
+                
+    if job_idx == -1 or job_idx >= len(job_emb):
+        print(f"Warning: Job ID {job_id} not found for update.")
+        return user_vector
+        
+    target_job_emb = job_emb[job_idx] # (384,)
+    
+    # Move user vector towards job vector
+    # New = (1-alpha) * Old + alpha * Job
+    new_vector = (1 - alpha) * user_vector + alpha * target_job_emb
+    
+    # Normalize to keep it on the hypersphere (cosine similarity relies on direction)
+    new_vector = torch.nn.functional.normalize(new_vector, p=2, dim=0)
+    
+    return new_vector
+
+
+def recommend_from_embedding(u_emb, top_k=5):
+    """
+    Generate recommendations from a pre-computed (and potentially updated) user embedding.
+    """
+    if job_emb is None or jobs is None:
         return []
 
-    # 1) Encoder le texte du profil
-    # convert_to_tensor=True renvoie un tensor sur CPU ou GPU selon dispo
-    u_emb = model.encode(profile_text, convert_to_tensor=True) # (384,)
-
-    # 2) Calculer d'abord la similarité Cosine (Content-Based) - C'est notre "Base" cohérente
-    # util.cos_sim attend (N, D) et (M, D) -> renvoie (N, M)
+    # 2) Calculer d'abord la similarité Cosine (Content-Based)
     cosine_scores = util.cos_sim(u_emb.unsqueeze(0), job_emb)[0]  # (N_jobs,)
     
     final_scores = cosine_scores
 
-    # 3) Si le classifieur est dispo, on l'utilise pour "Booster" ou "Affiner" le score
+    # 3) Hybrid Scoring with Classifier
     if classifier is not None:
         try:
-            # Expand u_emb to match job_emb size
             u_emb_expanded = u_emb.unsqueeze(0).expand(job_emb.size(0), -1)
-            
-            # Concatenate (N, 768)
             inputs = torch.cat((u_emb_expanded, job_emb), dim=1)
             
             with torch.no_grad():
-                mlp_scores = classifier(inputs).squeeze() # (N,)
+                mlp_scores = classifier(inputs).squeeze()
             
-            # --- HYBRIDATION ---
-            # On combine les deux signaux.
-            # Alpha gère l'équilibre : 
-            # 1.0 = 100% Content-Based (Cohérence max)
-            # 0.0 = 100% Interaction-Based (Personnalisation max)
-            # 0.7 est un bon point de départ pour garder la cohérence tout en personnalisant
+            # Hybrid Weight
             alpha = 0.3
-            
-            # Normalisation optionnelle si les échelles sont très différentes, 
-            # mais ici Cosine est [-1, 1] et Sigmoid est [0, 1], ça se mélange bien.
             final_scores = (1 - alpha) * cosine_scores + alpha * mlp_scores
             
-            print(f"[DEBUG] Hybrid Scoring Applied. Alpha={alpha}")
-            
         except Exception as e:
-            print(f"Classifier prediction failed: {e}. Fallback to cosine similarity.")
+            print(f"Classifier prediction failed: {e}")
             final_scores = cosine_scores
 
-    # 4) Top-k indices sur le score final
+    # 4) Top-k indices
     top_idx = torch.topk(final_scores, k=top_k).indices.cpu().tolist()
 
-    # 4) Récupérer les jobs
-    cols = []
-    for c in ["jobid", "job title", "role", "skills", "company", "companybucket", "location", "salary_range", "job description"]:
-        if c in jobs.columns:
-            cols.append(c)
+    # 5) Retrieve Jobs
+    return _get_jobs_from_indices(top_idx)
+
+
+def recommend_from_text(profile_text: str, top_k: int = 5) -> tuple:
+    """
+    Generates recommendations and returns the initial user embedding.
+    Returns: (recommendations_list, user_embedding_tensor)
+    """
+    if model is None:
+        return [], None
+
+    # 1) Encode text
+    u_emb = model.encode(profile_text, convert_to_tensor=True) # (384,)
     
-    # Fallback si colonnes manquantes (pour compatibilité frontend)
-    recos_df = jobs.iloc[top_idx].copy()
+    # 2) Recommend
+    recos = recommend_from_embedding(u_emb, top_k)
     
-    # Convertir en liste de dicts pour l'API
+    return recos, u_emb
+
+
+def _get_jobs_from_indices(indices):
     results = []
-    # Debug: print columns to see what we have
-    # print(f"[DEBUG] Columns: {jobs.columns.tolist()}")
+    recos_df = jobs.iloc[indices].copy()
     
     for idx, row in recos_df.iterrows():
-        # Ensure unique ID: use 'jobid' column if valid, else use the dataframe index
         raw_id = row.get("jobid")
-        if raw_id and str(raw_id).strip() != "" and str(raw_id).lower() != "nan":
-            final_id = str(raw_id)
-        else:
-            final_id = str(idx)
-
-        job_dict = {
-            "job_id": final_id, # Frontend attend string
-            "title": row.get("job title", "Unknown Title"),
-            "role": row.get("role", "Unknown Role"),
-            "company": row.get("company", "Unknown Company"),
-            "location": row.get("location", "Remote"),
-            "country": row.get("country", "Unknown Country"),
-            "skills": split_skills(row.get("skills", "")),
-            "salary_range": row.get("salary_range", "Competitive"),
-            "experience": row.get("experience", "Not specified"),
-            "qualifications": row.get("qualifications", "Not specified"),
-            "work_type": row.get("work type", "Full-time"),
-            "company_bucket": row.get("companybucket", "Unknown"),
-            "benefits": row.get("benefits", "Not specified"),
-            "company_profile": row.get("company profile", "{}"),
-            "description": row.get("job description", "")
-        }
-        results.append(job_dict)
-
-    print(f"[DEBUG] Recommended {len(results)} jobs for profile text length {len(profile_text)}")
-    for i, job in enumerate(results[:10]):
-        print(f"  {i+1}. {job['title']} at {job['company']}")
-    return results
-
-
-def get_job_details(job_ids: list) -> list:
-    """
-    Retrieves job details for a list of job IDs.
-    """
-    if jobs is None:
-        return []
-        
-    results = []
-    
-    # Filter jobs by ID
-    # We need to handle both string and int IDs potentially
-    # The dataframe has a 'jobid' column
-    
-    # Create a mapping for faster lookup if needed, but for now simple filtering
-    # Convert input IDs to strings for comparison
-    target_ids = set(str(jid) for jid in job_ids)
-    
-    # Filter dataframe
-    # We check if 'jobid' column exists and cast to string
-    if "jobid" in jobs.columns:
-        # Create a mask
-        mask = jobs["jobid"].astype(str).isin(target_ids)
-        filtered_df = jobs[mask]
-    else:
-        # Fallback to index if jobid column missing (unlikely based on previous code)
-        # Assuming index is the ID
-        filtered_df = jobs.iloc[[int(jid) for jid in job_ids if str(jid).isdigit() and int(jid) < len(jobs)]]
-
-    for idx, row in filtered_df.iterrows():
-        # Ensure unique ID: use 'jobid' column if valid, else use the dataframe index
-        raw_id = row.get("jobid")
-        if raw_id and str(raw_id).strip() != "" and str(raw_id).lower() != "nan":
-            final_id = str(raw_id)
-        else:
-            final_id = str(idx)
+        final_id = str(raw_id) if raw_id and str(raw_id).lower() != "nan" else str(idx)
 
         job_dict = {
             "job_id": final_id,
@@ -276,10 +255,24 @@ def get_job_details(job_ids: list) -> list:
             "description": row.get("job description", "")
         }
         results.append(job_dict)
-        
     return results
 
 
 if __name__ == "__main__":
     test_text = "python developer machine learning sql data science"
-    print(recommend_from_text(test_text))
+    print("--- Initial Recommendation ---")
+    recos, u_emb = recommend_from_text(test_text, top_k=3)
+    for r in recos:
+        print(f"{r['title']} ({r['job_id']})")
+        
+    if len(recos) > 0:
+        liked_job_id = recos[0]['job_id']
+        print(f"\n--- User LIKES job {liked_job_id} ---")
+        print("Updating user profile vector...")
+        
+        new_u_emb = update_user_profile_vector(u_emb, liked_job_id, alpha=0.2)
+        
+        print("\n--- New Recommendations (After Update) ---")
+        new_recos = recommend_from_embedding(new_u_emb, top_k=3)
+        for r in new_recos:
+            print(f"{r['title']} ({r['job_id']})")
