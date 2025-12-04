@@ -8,12 +8,23 @@ import { getRecommendations, getUserInteractions } from '@/lib/api'
 export function useRecommendations() {
   const router = useRouter()
   const { user } = useAuth()
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/lib/auth'
+import { mockCandidates, mockJobOffers, Candidate, JobOffer } from '@/lib/data'
+import { getLikedItems, getPassedItems } from '@/lib/swipes'
+import { getRecommendations, getUserInteractions } from '@/lib/api'
+
+export function useRecommendations() {
+  const router = useRouter()
+  const { user } = useAuth()
   const [items, setItems] = useState<(Candidate | JobOffer)[]>([])
 
 
 
   // Refactored version below
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     if (!user) {
@@ -26,6 +37,7 @@ export function useRecommendations() {
     }
 
     const fetchData = async () => {
+      setIsLoading(true)
       // Charger les items selon le rôle
       if (user.role === 'recruiter') {
         console.log("Fetching recruiter items")
@@ -35,6 +47,7 @@ export function useRecommendations() {
           c => !liked.includes(c.id) && !passed.includes(c.id)
         )
         setItems(available)
+        setIsLoading(false)
       } else {
         console.log("Fetching jobseeker items for user:", user)
 
@@ -90,7 +103,7 @@ export function useRecommendations() {
 
                // Backend now handles filtering of seen items!
                setItems(adaptedJobs)
-               return
+               setIsLoading(false)
                return
              }
           }
@@ -105,6 +118,7 @@ export function useRecommendations() {
           j => !liked.includes(j.id) && !passed.includes(j.id)
         )
         setItems(available)
+        setIsLoading(false)
       }
     }
 
@@ -115,5 +129,5 @@ export function useRecommendations() {
     setRefreshTrigger(prev => prev + 1)
   }
 
-  return { items, user, refresh }
+  return { items, user, refresh, isLoading }
 }

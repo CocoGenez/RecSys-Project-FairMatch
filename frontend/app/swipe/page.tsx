@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -12,8 +13,15 @@ import { useSwipe } from '@/hooks/useSwipe'
 export default function SwipePage() {
   const router = useRouter()
   const { logout } = useAuth()
-  const { items, user, refresh } = useRecommendations()
+  const { items, user, refresh, isLoading } = useRecommendations()
   const { isAnimating, handleSwipe, currentItems } = useSwipe(items)
+
+  // Auto-refresh when items are empty
+  useEffect(() => {
+    if (currentItems.length === 0 && !isLoading) {
+      refresh()
+    }
+  }, [currentItems.length, isLoading]) // Removed refresh from deps to avoid loop if refresh changes identity (it shouldn't but safe)
 
   const onSwipe = async (direction: 'left' | 'right') => {
     await handleSwipe(direction)
@@ -64,7 +72,21 @@ export default function SwipePage() {
 
         {/* Zone de swipe */}
         <div className="relative h-[600px] mb-6">
-          {currentItems.length === 0 ? (
+          {isLoading ? (
+             <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0 flex items-center justify-center bg-white rounded-3xl shadow-xl"
+            >
+              <div className="text-center p-8">
+                <div className="text-6xl mb-4 animate-bounce">🔄</div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Chargement...</h2>
+                <p className="text-gray-600">
+                  Recherche de nouvelles recommandations...
+                </p>
+              </div>
+            </motion.div>
+          ) : currentItems.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -82,7 +104,7 @@ export default function SwipePage() {
                   onClick={() => refresh()}
                   className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
                 >
-                  Charger plus de profils
+                  Réessayer
                 </motion.button>
               </div>
             </motion.div>
