@@ -117,7 +117,7 @@ The frontend is built with **Next.js**.
     ```
     http://localhost:3000
     ```
-
+If the frontent is still loading after a while, just refresh the page.
 ---
 
 ## Model Retraining
