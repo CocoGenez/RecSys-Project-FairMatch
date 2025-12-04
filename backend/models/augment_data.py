@@ -18,8 +18,8 @@ job_emb_path = processed_dir / "job_embeddings.pt"
 output_path = processed_dir / "interactions_augmented.csv"
 
 # Paramètres d'augmentation
-SIMILAR_JOBS_TO_ADD = 15  # Pour chaque vrai LIKE, on ajoute 3 jobs similaires
-NEGATIVE_RATIO = 4.0     # On ajoute un peu plus de PASS pour garder l'équilibre
+SIMILAR_JOBS_TO_ADD = 3  # Pour chaque vrai LIKE, on ajoute 3 jobs similaires
+NEGATIVE_RATIO = 1.2     # On ajoute un peu plus de PASS pour garder l'équilibre
 
 def augment_data():
     print("Démarrage de l'augmentation des données")

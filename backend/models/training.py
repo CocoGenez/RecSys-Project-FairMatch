@@ -80,7 +80,7 @@ def build_user_profile_text(row):
         f"skills python {safe_str(row.get('Python_Level', ''))}, sql {safe_str(row.get('SQL_Level', ''))}, java {safe_str(row.get('Java_Level', ''))}."
     )
 
-def train_model(epochs=20, batch_size=32, lr=0.001):
+def train_model(epochs=50, batch_size=32, lr=0.001):
     print("Loading data...")
     
     # Load Data
