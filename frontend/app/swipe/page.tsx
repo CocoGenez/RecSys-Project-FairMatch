@@ -12,8 +12,19 @@ import { useSwipe } from '@/hooks/useSwipe'
 export default function SwipePage() {
   const router = useRouter()
   const { logout } = useAuth()
-  const { items, user } = useRecommendations()
+  const { items, user, refresh } = useRecommendations()
   const { isAnimating, handleSwipe, currentItems } = useSwipe(items)
+
+  const onSwipe = async (direction: 'left' | 'right') => {
+    await handleSwipe(direction)
+    if (direction === 'right') {
+      // Refresh recommendations after a like
+      // Small delay to let the animation finish/backend update
+      setTimeout(() => {
+        refresh()
+      }, 500)
+    }
+  }
 
   const handleLogout = () => {
     logout()
@@ -87,7 +98,7 @@ export default function SwipePage() {
                   key={item.id}
                   candidate={user.role === 'recruiter' ? (item as Candidate) : undefined}
                   jobOffer={user.role === 'jobseeker' ? (item as JobOffer) : undefined}
-                  onSwipe={handleSwipe}
+                  onSwipe={onSwipe}
                   index={index}
                 />
               ))}
@@ -105,7 +116,7 @@ export default function SwipePage() {
             <motion.button
               whileHover={{ scale: 1.1, rotate: -10 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => handleSwipe('left')}
+              onClick={() => onSwipe('left')}
               disabled={isAnimating}
               className="w-16 h-16 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-red-200 hover:border-red-400 transition-colors disabled:opacity-50"
             >
@@ -114,7 +125,7 @@ export default function SwipePage() {
             <motion.button
               whileHover={{ scale: 1.1, rotate: 10 }}
               whileTap={{ scale: 0.9 }}
-              onClick={() => handleSwipe('right')}
+              onClick={() => onSwipe('right')}
               disabled={isAnimating}
               className="w-16 h-16 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-green-200 hover:border-green-400 transition-colors disabled:opacity-50"
             >

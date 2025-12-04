@@ -10,6 +10,11 @@ export function useRecommendations() {
   const { user } = useAuth()
   const [items, setItems] = useState<(Candidate | JobOffer)[]>([])
 
+
+
+  // Refactored version below
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
   useEffect(() => {
     if (!user) {
       router.push('/login')
@@ -122,7 +127,11 @@ export function useRecommendations() {
     }
 
     fetchData()
-  }, [user, router])
+  }, [user, router, refreshTrigger])
 
-  return { items, user }
+  const refresh = () => {
+    setRefreshTrigger(prev => prev + 1)
+  }
+
+  return { items, user, refresh }
 }
