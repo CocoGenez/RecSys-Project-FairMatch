@@ -121,7 +121,6 @@ export default function SwipeCard({ candidate, jobOffer, onSwipe, index }: Swipe
           </div>
         ) : null}
 
-        {/* Indicateurs de swipe */}
         <motion.div
           className="absolute top-4 left-4 p-3 bg-red-500 rounded-full shadow-lg"
           style={{

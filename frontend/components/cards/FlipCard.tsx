@@ -64,7 +64,6 @@ export default function FlipCard({ candidate, onSwipe, index, onViewCV }: FlipCa
       onClick={handleCardClick}
     >
       <div className="bg-white rounded-3xl shadow-2xl h-full overflow-hidden border-2 border-gray-100 flex flex-col">
-        {/* Photo - plus petite */}
         <div className="relative h-48 bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center pt-8">
           {candidate.photo ? (
             <img
@@ -128,7 +127,6 @@ export default function FlipCard({ candidate, onSwipe, index, onViewCV }: FlipCa
         </div>
       </div>
 
-      {/* Indicateurs de swipe */}
       <motion.div
         className="absolute top-4 left-4 p-3 bg-red-500 rounded-full shadow-lg z-10"
         style={{
