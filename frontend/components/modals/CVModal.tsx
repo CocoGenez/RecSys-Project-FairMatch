@@ -74,10 +74,10 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                 <div className="max-w-4xl mx-auto space-y-8">
                   {/* Informations personnelles */}
                   <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Informations personnelles</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Personal Information</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm text-gray-600">Nom complet</p>
+                        <p className="text-sm text-gray-600">Full name</p>
                         <p className="font-semibold text-gray-800">
                           {candidate.firstName} {candidate.lastName}
                         </p>
@@ -87,7 +87,7 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                         <p className="font-semibold text-gray-800">{candidate.email}</p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600">Localisation</p>
+                        <p className="text-sm text-gray-600">Location</p>
                         <p className="font-semibold text-gray-800">{candidate.location}</p>
                       </div>
                     </div>
@@ -95,7 +95,7 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
 
                   {/* Compétences */}
                   <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Compétences</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Skills</h3>
                     <div className="flex flex-wrap gap-2">
                       {candidate.skills.map((skill, idx) => (
                         <span
@@ -110,7 +110,7 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
 
                   {/* Qualités */}
                   <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-4">Qualités</h3>
+                    <h3 className="text-xl font-bold text-gray-800 mb-4">Qualities</h3>
                     <div className="flex flex-wrap gap-2">
                       {candidate.qualities.map((quality, idx) => (
                         <span
@@ -126,17 +126,17 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                   {/* Expériences */}
                   {candidate.cvFormData.experiences.length > 0 && (
                     <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-2xl p-6">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">Expériences professionnelles</h3>
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">Professional Experience</h3>
                       <div className="space-y-4">
                         {candidate.cvFormData.experiences.map((exp, idx) => (
                           <div key={idx} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                             <div className="space-y-2">
                               <div>
-                                <span className="text-sm font-semibold text-gray-600">Poste : </span>
+                                <span className="text-sm font-semibold text-gray-600">Position : </span>
                                 <span className="text-lg font-bold text-gray-800">{exp.position || 'Non spécifié'}</span>
                               </div>
                               <div>
-                                <span className="text-sm font-semibold text-gray-600">Entreprise : </span>
+                                <span className="text-sm font-semibold text-gray-600">Company : </span>
                                 <span className="text-purple-600 font-semibold">{exp.company || 'Non spécifié'}</span>
                               </div>
                               {exp.description && (
@@ -146,7 +146,7 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                                 </div>
                               )}
                               <div>
-                                <span className="text-sm font-semibold text-gray-600">Période : </span>
+                                <span className="text-sm font-semibold text-gray-600">Period : </span>
                                 <span className="text-gray-700">
                                   {exp.startDate || 'Non spécifié'} - {exp.endDate || (exp.current ? 'Présent' : 'Non spécifié')}
                                 </span>
@@ -161,17 +161,17 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                   {/* Formation */}
                   {candidate.cvFormData.education.length > 0 && (
                     <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-6">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">Formation</h3>
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">Education</h3>
                       <div className="space-y-4">
                         {candidate.cvFormData.education.map((edu, idx) => (
                           <div key={idx} className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                             <div className="space-y-2">
                               <div>
-                                <span className="text-sm font-semibold text-gray-600">Diplôme : </span>
+                                <span className="text-sm font-semibold text-gray-600">Degree : </span>
                                 <span className="text-lg font-bold text-gray-800">{edu.degree || 'Non spécifié'}</span>
                               </div>
                               <div>
-                                <span className="text-sm font-semibold text-gray-600">Établissement : </span>
+                                <span className="text-sm font-semibold text-gray-600">Institution : </span>
                                 <span className="text-purple-600 font-semibold">{edu.school || 'Non spécifié'}</span>
                               </div>
                               {edu.field && (
@@ -181,7 +181,7 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                                 </div>
                               )}
                               <div>
-                                <span className="text-sm font-semibold text-gray-600">Période : </span>
+                                <span className="text-sm font-semibold text-gray-600">Period : </span>
                                 <span className="text-gray-700">
                                   {edu.startDate || 'Non spécifié'} - {edu.endDate || (edu.current ? 'Présent' : 'Non spécifié')}
                                 </span>
@@ -204,11 +204,11 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                           const languageLevel = typeof lang === 'string' ? null : lang.level
                           
                           const levelLabels: Record<string, string> = {
-                            beginner: 'Débutant',
-                            intermediate: 'Intermédiaire',
-                            advanced: 'Avancé',
-                            fluent: 'Courant',
-                            native: 'Natif'
+                            beginner: 'Beginner',
+                            intermediate: 'Intermediate',
+                            advanced: 'Advanced',
+                            fluent: 'Fluent',
+                            native: 'Native'
                           }
                           
                           return (
@@ -249,7 +249,7 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                   {/* Bio */}
                   {candidate.bio && (
                     <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-6">
-                      <h3 className="text-xl font-bold text-gray-800 mb-4">À propos</h3>
+                      <h3 className="text-xl font-bold text-gray-800 mb-4">About</h3>
                       <p className="text-gray-700 leading-relaxed">{candidate.bio}</p>
                     </div>
                   )}
@@ -258,7 +258,7 @@ export default function CVModal({ candidate, isOpen, onClose }: CVModalProps) {
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
                     <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600">Aucun CV disponible</p>
+                    <p className="text-gray-600">No CV available</p>
                   </div>
                 </div>
               )}

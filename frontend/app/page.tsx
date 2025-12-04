@@ -221,9 +221,9 @@ export default function Home() {
             </h2>
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                'Interface intuitive et moderne',
-                'Matching intelligent et rapide',
-                '100% gratuit et sans engagement'
+                'Intuitive and modern interface',
+                'Smart and fast matching',
+                '100% free and commitment-free'
               ].map((benefit, index) => (
                 <motion.div
                   key={index}

@@ -150,7 +150,7 @@ export default function MyJobsPage() {
                  company: job.company,
                  location: job.location,
                  objectives: job.description, // Map description to objectives
-                 startDate: 'Dès que possible',
+                 startDate: 'As soon as possible',
                  requiredQualities: job.skills, // Fallback/Duplicate for display
                  descriptionType: 'text',
                  description: job.description,

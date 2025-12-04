@@ -78,7 +78,6 @@ export default function FlipCard({ candidate, onSwipe, index, onViewCV }: FlipCa
           )}
         </div>
         
-        {/* Informations essentielles */}
         <div className="flex-1 p-6 flex flex-col">
           <div className="text-center mb-4">
             <h2 className="text-2xl font-bold text-gray-800 mb-1">
@@ -88,7 +87,7 @@ export default function FlipCard({ candidate, onSwipe, index, onViewCV }: FlipCa
           </div>
           
           <div className="mb-4">
-            <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Compétences</h3>
+            <h3 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wide">Skills</h3>
             <div className="flex flex-wrap gap-1.5 justify-center">
               {candidate.skills.slice(0, 3).map((skill, idx) => (
                 <span
