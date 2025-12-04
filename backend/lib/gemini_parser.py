@@ -30,7 +30,8 @@ class ResumeSchema(BaseModel):
         "Database Administrator", 
         "Game Developer", 
         "AI Engineer", 
-        "Network Security Engineer"
+        "Network Security Engineer",
+        "UI/UX Designer"
     ] = Field(..., description="The specific career path that best matches the candidate's profile.")
     Python_Level: Literal["Strong", "Average", "Weak"]
     SQL_Level: Literal["Strong", "Average", "Weak"]
