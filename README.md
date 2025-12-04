@@ -32,6 +32,8 @@ git clone https://github.com/CocoGenez/RecSys-Project-FairMatch.git
 cd RecSys-Project-FairMatch
 ```
 
+the owner of the repository **CocoGenez** was not available at the end of the project so we couldnt invite you to the repository and we realized to late we needed him to invite you. If you dont accept if he invites you past midnight -> we made a fork of the repository and invited you to it : https://github.com/Amik24/RecSys-Project-FairMatch/invitations
+
 ### 2. Backend Setup
 
 The backend is built with **FastAPI**.

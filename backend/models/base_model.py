@@ -286,7 +286,7 @@ def _get_jobs_from_indices(indices, scores=None):
             "location": row.get("location", "Remote"),
             "country": row.get("country", "Unknown Country"),
             "skills": split_skills(row.get("skills", "")),
-            "salary_range": row.get("salary_range", "Competitive"),
+            "salary_range": row.get("salary range", "Competitive"),
             "experience": row.get("experience", "Not specified"),
             "qualifications": row.get("qualifications", "Not specified"),
             "work_type": row.get("work type", "Full-time"),
