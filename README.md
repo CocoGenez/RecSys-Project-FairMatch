@@ -1,123 +1,174 @@
-# FairMatch - Application de Matching Recrutement
+# FairMatch
 
-Une application web moderne et interactive de type Tinder pour le recrutement, permettant aux recruteurs de découvrir des candidats et aux chercheurs d'emploi de trouver des offres qui leur correspondent.
+**FairMatch** is a modern, interactive recruitment application that brings the "swipe" experience to job hunting. It connects job seekers (and in the future recruiters) through a dynamic interface, allowing them to discover matches efficiently.
 
-## 🎨 Fonctionnalités
+The project is currently hosted on : https://fairmatch.vercel.app/ with the backend being at http://13.221.63.255:8000 and the database at postgresql://fairmatch_admin:fairmatch_admin_password@fairmatch-db.c418ksio6pdy.us-east-1.rds.amazonaws.com:5432/postgres
 
-- **Authentification** : Inscription et connexion par email/mot de passe
-- **Sélection de rôle** : Choix entre Recruteur ou Rechercheur d'emploi
-- **Interface Swipe** : 
-  - Swipe à droite = J'aime
-  - Swipe à gauche = Passer
-  - Animations fluides et interactives
-- **Listes personnalisées** :
-  - Recruteurs : "Mes candidats retenus"
-  - Rechercheurs : "Mes offres retenues"
-- **Design moderne** : Interface colorée, animée et mobile-first
+## Team Members
 
-## 🚀 Technologies
-
-- **Next.js 14** : Framework React avec App Router
-- **TypeScript** : Typage statique
-- **TailwindCSS** : Styling moderne et responsive
-- **Framer Motion** : Animations fluides et interactives
-- **Lucide React** : Icônes modernes
-- **localStorage** : Stockage local des données
-
-## 📦 Installation
-
-1. **Installer les dépendances** :
-```bash
-npm install
-```
-
-2. **Lancer le serveur de développement** :
-```bash
-npm run dev
-```
-
-3. **Ouvrir dans le navigateur** :
-```
-http://localhost:3000
-```
-
-## 🎯 Utilisation
-
-### Pour les Recruteurs
-
-1. Créez un compte ou connectez-vous
-2. Sélectionnez le rôle "Recruteur"
-3. Swipez sur les candidats :
-   - **Swipe à droite** : Candidat apprécié → Ajouté à "Mes candidats retenus"
-   - **Swipe à gauche** : Candidat rejeté
-4. Consultez vos candidats retenus dans la page dédiée
-
-### Pour les Rechercheurs d'emploi
-
-1. Créez un compte ou connectez-vous
-2. Sélectionnez le rôle "Rechercheur d'emploi"
-3. Swipez sur les offres d'emploi :
-   - **Swipe à droite** : Offre intéressante → Ajoutée à "Mes offres retenues"
-   - **Swipe à gauche** : Offre rejetée
-4. Consultez vos offres retenues dans la page dédiée
-
-## 📁 Structure du Projet
-
-```
-├── app/
-│   ├── login/          # Page de connexion
-│   ├── register/       # Page d'inscription
-│   ├── select-role/    # Sélection du rôle
-│   ├── swipe/          # Interface principale de swipe
-│   ├── my-candidates/  # Liste des candidats retenus (recruteurs)
-│   ├── my-jobs/        # Liste des offres retenues (rechercheurs)
-│   ├── layout.tsx      # Layout principal
-│   └── globals.css     # Styles globaux
-├── components/
-│   └── SwipeCard.tsx   # Composant de carte swipeable
-├── lib/
-│   ├── auth.tsx        # Gestion de l'authentification
-│   ├── data.ts         # Données mock (candidats et offres)
-│   └── swipes.ts       # Gestion des swipes
-└── package.json
-```
-
-## 🎨 Design
-
-- **Couleurs** : Palette purple/pink pour un design moderne et engageant
-- **Animations** : Transitions fluides avec Framer Motion
-- **Responsive** : Design mobile-first, adapté à tous les écrans
-- **Micro-interactions** : Effets visuels lors des swipes et interactions
-
-## 💾 Stockage des Données
-
-Les données sont stockées localement dans le navigateur via `localStorage` :
-- **users** : Liste des utilisateurs enregistrés
-- **user** : Utilisateur actuellement connecté
-- **swipes** : Historique de tous les swipes effectués
-
-## 🔧 Scripts Disponibles
-
-- `npm run dev` : Lance le serveur de développement
-- `npm run build` : Compile l'application pour la production
-- `npm run start` : Lance le serveur de production
-- `npm run lint` : Vérifie le code avec ESLint
-
-## 📝 Notes
-
-- Les données sont stockées localement (localStorage), elles seront perdues si vous videz le cache du navigateur
-- Les photos de profil utilisent des avatars générés aléatoirement (pravatar.cc)
-- L'application est entièrement fonctionnelle en mode développement
-
-## 🎉 Améliorations Futures Possibles
-
-- Backend avec base de données réelle
-- Système de matching bidirectionnel
-- Chat entre recruteurs et candidats
-- Notifications en temps réel
-- Filtres avancés de recherche
-- Profils détaillés avec CV/portfolio
+*   Alexis Boulic
+*   Corentin Gaude
+*   Ikram Amine
+*   Paul Busetta
+*   Rayan Gregoire
 
 ---
 
-Développé avec ❤️ pour une expérience de recrutement moderne et fun !
+## 🚀 Local Setup Guide
+
+Follow these steps to run the system locally on your machine.
+
+### Prerequisites
+
+*   **Git**
+*   **Python 3.12+**
+*   **Node.js 18+**
+*   **PostgreSQL** (or Docker to run the database)
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/CocoGenez/RecSys-Project-FairMatch.git
+cd RecSys-Project-FairMatch
+```
+
+### 2. Backend Setup
+
+The backend is built with **FastAPI**.
+
+1.  Navigate to the backend directory:
+    ```bash
+    cd backend
+    ```
+
+2.  Create a virtual environment:
+    ```bash
+    # Windows
+    python -m venv venv
+    .\venv\Scripts\activate
+
+    # macOS/Linux
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+
+3.  Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+4.  **Database Configuration**:
+    You need a running PostgreSQL database.
+    *   **Option A (Docker)**: Run `docker-compose -f docker-compose.local.yml up -d postgres` from the root directory to start a local DB container.
+    *   **Option B (Manual)**: Ensure you have a local Postgres server running and update the `.env` file (or environment variables) with your credentials.
+        *   Default expected URL: `postgresql://fairmatch_local:fairmatch_local_password@localhost:5432/fairmatch_local`
+
+5.  Run the application:
+    ```bash
+    uvicorn main:app --reload
+    ```
+    The API will be available at `http://localhost:8000`. Docs at `http://localhost:8000/docs`.
+
+Let a bit of time for the backend to start up.
+
+## Testing the Setup
+
+### 1. Check Backend Health
+
+Let a bit of time for the backend to start up.
+
+```powershell
+curl http://localhost:8000/
+```
+
+Expected response:
+```json
+{"status":"ok","message":"FairMatch API is running","version":"1.0"}
+```
+
+### 2. Test Database Connection
+
+```powershell
+curl http://localhost:8000/auth/users/1
+```
+
+Should return user data or 404 if no users exist.
+
+### 3. Frontend Setup
+
+The frontend is built with **Next.js**.
+
+1.  Open a new terminal and navigate to the frontend directory:
+    ```bash
+    cd frontend
+    ```
+
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+
+3.  Run the development server:
+    ```bash
+    npm run dev
+    ```
+
+4.  Open your browser and visit:
+    ```
+    http://localhost:3000
+    ```
+
+---
+
+## Model Retraining
+
+The recommendation system uses a neural network classifier to predict matches based on user and job embeddings.
+
+### Prerequisites for Retraining
+
+Ensure you have the following data files in `backend/Processed/`:
+*   `interactions_export.csv` (User-Job interactions)
+*   `users_export.csv` (User profiles)
+*   `jobs.parquet` (Job details)
+*   `job_embeddings.pt` (Pre-computed job embeddings)
+
+### How to Retrain
+
+1.  Activate your backend virtual environment (if not already active).
+
+2.  Run the training script:
+    ```bash
+    cd backend/models
+    python training.py
+    ```
+
+3.  **What happens?**
+    *   The script loads interactions and user/job data.
+    *   It generates fresh user embeddings using `SentenceTransformer`.
+    *   It trains a `RecSysClassifier` model to predict the probability of a "like".
+    *   The best model is saved to `backend/models/classifier.pt`.
+
+4.  **Using the new model**:
+    Restart the backend server to load the newly trained `classifier.pt`.
+
+---
+
+## Docker Quick Start (Alternative)
+
+This method runs the **Backend** and **Database** in Docker containers, while the **Frontend** runs locally on your machine.
+
+1.  **Start Backend & Database**:
+    Run the following command from the project root:
+    ```bash
+    docker-compose -f docker-compose.local.yml up -d
+    ```
+
+2.  **Start Frontend**:
+    Open a new terminal and run:
+    ```bash
+    cd frontend
+    npm install
+    npm run dev
+    ```
+
+3.  Access the app at `http://localhost:3000`.
