@@ -46,7 +46,7 @@ def recommend(user_id: int, db: Session = Depends(get_db)) -> Dict[str, Any]:
     print(f"[INFO] Generating recommendations for User {user_id} with profile: {profile_text[:100]}...")
 
     # 3. Get Recommendations from Model
-    recommended_jobs = recommend_from_text(profile_text, top_k=100)
+    recommended_jobs, _ = recommend_from_text(profile_text, top_k=100)
     
     print(f"[INFO] Generated {len(recommended_jobs)} recommendations for User {user_id}")
 
