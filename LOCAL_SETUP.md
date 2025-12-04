@@ -169,6 +169,8 @@ docker-compose -f docker-compose.local.yml up -d
 
 ### 1. Check Backend Health
 
+Let a bit of time for the backend to start up.
+
 ```powershell
 curl http://localhost:8000/
 ```

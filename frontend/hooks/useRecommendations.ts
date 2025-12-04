@@ -47,79 +47,56 @@ export function useRecommendations() {
           const userId = user.id;
 
           if (userId && !isNaN(parseInt(userId))) {
-             console.log("Calling getRecommendations (NEW) with ID:", userId)
-             const data = await getRecommendations(parseInt(userId))
-             console.log("Got recommendations:", data)
-             if (data && data.recommendations) {
+            console.log("Calling getRecommendations (NEW) with ID:", userId)
+            const data = await getRecommendations(parseInt(userId))
+            console.log("Got recommendations:", data)
+            if (data && data.recommendations) {
 
-               // Adapt backend data to frontend interface
-               const adaptedJobs: JobOffer[] = data.recommendations.map((job: any) => {
-                 let companyProfile = null;
-                 try {
-                   if (typeof job.company_profile === 'string') {
-                     companyProfile = JSON.parse(job.company_profile);
-                   } else {
-                     companyProfile = job.company_profile;
-                   }
-                 } catch (e) {
-                   console.error("Error parsing company_profile", e);
-                 }
+              // Adapt backend data to frontend interface
+              const adaptedJobs: JobOffer[] = data.recommendations.map((job: any) => {
+                let companyProfile = null;
+                try {
+                  if (typeof job.company_profile === 'string') {
+                    companyProfile = JSON.parse(job.company_profile);
+                  } else {
+                    companyProfile = job.company_profile;
+                  }
+                } catch (e) {
+                  console.error("Error parsing company_profile", e);
+                }
 
-                 let benefits = job.benefits;
-                 if (typeof benefits === 'string' && benefits.startsWith("{'") && benefits.endsWith("'}")) {
-                   benefits = benefits.substring(2, benefits.length - 2);
-                 }
+                let benefits = job.benefits;
+                if (typeof benefits === 'string' && benefits.startsWith("{'") && benefits.endsWith("'}")) {
+                  benefits = benefits.substring(2, benefits.length - 2);
+                }
 
-                 return {
-                   id: job.job_id.toString(),
-                   title: job.title,
-                   company: job.company,
-                   location: job.location,
-                   requiredSkills: job.skills,
-                   description: job.description,
-                   salary: job.salary_range,
-                   logo: '💼',
-                   role: job.role,
-                   country: job.country,
-                   experience: job.experience,
-                   qualifications: job.qualifications,
-                   workType: job.work_type,
-                   companyBucket: job.company_bucket,
-                   benefits: benefits,
-                   companyProfile: companyProfile,
-                   salaryRange: job.salary_range,
-                   skills: job.skills
-                 };
-               })
+                return {
+                  id: job.job_id.toString(),
+                  title: job.title,
+                  company: job.company,
+                  location: job.location,
+                  requiredSkills: job.skills,
+                  description: job.description,
+                  salary: job.salary_range,
+                  logo: '💼',
+                  role: job.role,
+                  country: job.country,
+                  experience: job.experience,
+                  qualifications: job.qualifications,
+                  workType: job.work_type,
+                  companyBucket: job.company_bucket,
+                  benefits: benefits,
+                  companyProfile: companyProfile,
+                  salaryRange: job.salary_range,
+                  skills: job.skills
+                };
+              })
 
-<<<<<<< HEAD
-               // Filter out already swiped items - it use backend interactions
-               let liked: string[] = []
-               let passed: string[] = []
-               
-               try {
-                 const interactions = await getUserInteractions(parseInt(userId))
-                 liked = interactions.liked
-                 passed = interactions.passed
-                 console.log(`Backend interactions: ${liked.length} liked, ${passed.length} passed`)
-               } catch (e) {
-                 console.warn("Failed to fetch backend interactions, falling back to localStorage", e)
-                 liked = getLikedItems(user.id, 'job')
-                 passed = getPassedItems(user.id, 'job')
-               }
-               
-               const filteredJobs = adaptedJobs.filter(
-                 job => !liked.includes(job.id) && !passed.includes(job.id)
-               )
-
-               setItems(filteredJobs)
-=======
-               // Backend now handles filtering of seen items!
-               setItems(adaptedJobs)
-               setIsLoading(false)
->>>>>>> 667545c834520350fe40d50a05cce0b9293a0bc8
-               return
-             }
+              // Backend now handles filtering of seen items!
+              setItems(adaptedJobs)
+              setIsLoading(false)
+              return
+            }
           }
         } catch (e) {
           console.error("Failed to fetch recommendations, falling back to mock", e)
