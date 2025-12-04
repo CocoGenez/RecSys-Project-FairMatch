@@ -62,15 +62,18 @@ def recommend(user_id: int, db: Session = Depends(get_db)) -> Dict[str, Any]:
     fetch_k = 50 
     final_k = 10
     
+    # Use low hybrid weight to prioritize content-based relevance
+    HYBRID_WEIGHT = 0.05
+
     if user.profile_embedding:
         import torch
         from models.base_model import recommend_from_embedding
         print(f"[INFO] Using stored profile embedding for User {user_id}")
         u_emb = torch.tensor(user.profile_embedding)
-        candidates = recommend_from_embedding(u_emb, top_k=fetch_k, exclude_ids=seen_ids)
+        candidates = recommend_from_embedding(u_emb, top_k=fetch_k, exclude_ids=seen_ids, hybrid_weight=HYBRID_WEIGHT)
     else:
         # Fallback to text-based
-        candidates, u_emb = recommend_from_text(profile_text, top_k=fetch_k, exclude_ids=seen_ids)
+        candidates, u_emb = recommend_from_text(profile_text, top_k=fetch_k, exclude_ids=seen_ids, hybrid_weight=HYBRID_WEIGHT)
         
         # Save this initial embedding to DB so we can update it later!
         if u_emb is not None:

@@ -176,10 +176,13 @@ def update_user_profile_vector(user_vector, job_id, alpha=0.1):
     return new_vector
 
 
-def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None):
+def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None, hybrid_weight=0.05):
     """
     Generate recommendations from a pre-computed (and potentially updated) user embedding.
     exclude_ids: list of job_ids (str) to exclude from results.
+    hybrid_weight: float (0.0 to 1.0). Influence of the classifier. 
+                   0.0 = Pure Content-Based (Cosine).
+                   1.0 = Pure Classifier (MLP).
     """
     if job_emb is None or jobs is None:
         return []
@@ -190,7 +193,7 @@ def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None):
     final_scores = cosine_scores
 
     # 3) Hybrid Scoring with Classifier
-    if classifier is not None:
+    if classifier is not None and hybrid_weight > 0.0:
         try:
             u_emb_expanded = u_emb.unsqueeze(0).expand(job_emb.size(0), -1)
             inputs = torch.cat((u_emb_expanded, job_emb), dim=1)
@@ -199,7 +202,7 @@ def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None):
                 mlp_scores = classifier(inputs).squeeze()
             
             # Hybrid Weight
-            alpha = 0.3
+            alpha = hybrid_weight
             final_scores = (1 - alpha) * cosine_scores + alpha * mlp_scores
             
         except Exception as e:
@@ -246,7 +249,7 @@ def recommend_from_embedding(u_emb, top_k=5, exclude_ids=None):
     return _get_jobs_from_indices(top_idx, top_scores)
 
 
-def recommend_from_text(profile_text: str, top_k: int = 5, exclude_ids=None) -> tuple:
+def recommend_from_text(profile_text: str, top_k: int = 5, exclude_ids=None, hybrid_weight=0.05) -> tuple:
     """
     Generates recommendations and returns the initial user embedding.
     Returns: (recommendations_list, user_embedding_tensor)
@@ -258,7 +261,7 @@ def recommend_from_text(profile_text: str, top_k: int = 5, exclude_ids=None) -> 
     u_emb = model.encode(profile_text, convert_to_tensor=True) # (384,)
     
     # 2) Recommend
-    recos = recommend_from_embedding(u_emb, top_k, exclude_ids=exclude_ids)
+    recos = recommend_from_embedding(u_emb, top_k, exclude_ids=exclude_ids, hybrid_weight=hybrid_weight)
     
     return recos, u_emb
 
