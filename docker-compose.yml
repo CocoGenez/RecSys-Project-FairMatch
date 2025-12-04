@@ -1,16 +1,41 @@
 services:
-  # Backend API (sans ML) - pour EC2
+  # PostgreSQL Database - Local
+  postgres:
+    image: postgres:15-alpine
+    container_name: fairmatch-postgres-local
+    environment:
+      POSTGRES_USER: fairmatch_local
+      POSTGRES_PASSWORD: fairmatch_local_password
+      POSTGRES_DB: fairmatch_local
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fairmatch_local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Backend API (local avec PostgreSQL local)
   backend:
     build: ./backend
+    container_name: fairmatch-backend-local
     ports:
       - "8000:8000"
     env_file:
-      - ./backend/.env
+      - ./backend/.env.local
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   # Backend ML (avec recommendations) - pour local
   backend-ml:
     build: ./backend-ml
+    container_name: fairmatch-ml-local
     ports:
       - "8001:8001"
     volumes:
@@ -20,3 +45,7 @@ services:
     restart: unless-stopped
     profiles:
       - ml
+
+volumes:
+  postgres_data:
+    driver: local
