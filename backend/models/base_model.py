@@ -76,21 +76,52 @@ def split_skills(val):
     if not val:
         return []
         
-    # 1. Try splitting by the specific pattern: lowercase/paren + space + Uppercase
-    # This handles the "merged sentences" issue (e.g. "development Security")
-    # Regex: Lookbehind for [a-z)] followed by space(s) followed by Lookahead for [A-Z]
-    parts = re.split(r'(?<=[a-z)])\s+(?=[A-Z])', val)
     
-    final_skills = []
-    for p in parts:
-        # 2. For each part, also split by comma if present
-        if "," in p:
-            subs = [s.strip() for s in p.split(",") if s.strip()]
-            final_skills.extend(subs)
-        else:
-            final_skills.append(p.strip())
-            
-    return final_skills
+    skills = []
+    current = []
+    paren_depth = 0
+    s = val
+    length = len(s)
+    for i, ch in enumerate(s):
+        # update parentheses depth
+        if ch == '(':
+            paren_depth += 1
+            current.append(ch)
+            continue
+        if ch == ')':
+            paren_depth = max(0, paren_depth - 1)
+            current.append(ch)
+            continue
+        # If comma and we're NOT inside parentheses, treat as separator
+        if ch == ',' and paren_depth == 0:
+            token = ''.join(current).strip()
+            if token:
+                skills.append(token)
+            current = []
+            continue
+        # Boundary split: space where previous char is lowercase or ')' and next is Uppercase
+        # Only split when not inside parentheses
+        if (
+            ch == ' ' and paren_depth == 0 and
+            i + 1 < length and
+            i - 1 >= 0 and
+            (s[i - 1].islower() or s[i - 1] == ')') and
+            s[i + 1].isupper()
+        ):
+            token = ''.join(current).strip()
+            if token:
+                skills.append(token)
+            current = []
+            # do not include the boundary space
+            continue
+        current.append(ch)
+    # append last token
+    last = ''.join(current).strip()
+    if last:
+        skills.append(last)
+    # final cleanup: strip and remove empty entries
+    final = [t.strip() for t in skills if t and t.strip()]
+    return final
 
 
 def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
