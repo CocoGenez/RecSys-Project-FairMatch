@@ -4,12 +4,107 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Heart } from 'lucide-react'
+import { ArrowLeft, Heart, Code, Briefcase, Zap, LineChart, Palette, Server, Database, Smartphone, Cpu } from 'lucide-react'
 import JobModal from '@/components/modals/JobModal'
 import { getJobs } from '@/lib/backend'
 import { getLikedItems } from '@/lib/backend'
 import { getLikedJobs } from '@/lib/api'
 import { JobOffer } from '@/lib/types'
+
+// Function to get icon and gradient based on job title
+function getJobTheme(title: string) {
+  const lowerTitle = title.toLowerCase()
+  
+  // UX/UI Designer, UX Researcher - Design roles
+  if (lowerTitle.includes('ux') || lowerTitle.includes('ui') || lowerTitle.includes('designer')) {
+    return {
+      icon: Palette,
+      gradient: 'from-pink-400 to-rose-500',
+      bgColor: 'bg-gradient-to-br from-pink-400 to-rose-500'
+    }
+  }
+  
+  // Data roles - Data Analyst, Data Engineer, Data Scientist
+  if (lowerTitle.includes('data')) {
+    if (lowerTitle.includes('scientist')) {
+      return {
+        icon: Cpu,
+        gradient: 'from-violet-500 to-purple-600',
+        bgColor: 'bg-gradient-to-br from-violet-500 to-purple-600'
+      }
+    }
+    if (lowerTitle.includes('engineer')) {
+      return {
+        icon: Database,
+        gradient: 'from-cyan-400 to-blue-500',
+        bgColor: 'bg-gradient-to-br from-cyan-400 to-blue-500'
+      }
+    }
+    // Data Analyst
+    return {
+      icon: LineChart,
+      gradient: 'from-green-400 to-emerald-600',
+      bgColor: 'bg-gradient-to-br from-green-400 to-emerald-600'
+    }
+  }
+  
+  // Frontend/Backend/Web/Software Developer roles
+  if (lowerTitle.includes('front-end') || lowerTitle.includes('frontend')) {
+    return {
+      icon: Smartphone,
+      gradient: 'from-teal-400 to-cyan-500',
+      bgColor: 'bg-gradient-to-br from-teal-400 to-cyan-500'
+    }
+  }
+  if (lowerTitle.includes('back-end') || lowerTitle.includes('backend')) {
+    return {
+      icon: Server,
+      gradient: 'from-indigo-500 to-blue-600',
+      bgColor: 'bg-gradient-to-br from-indigo-500 to-blue-600'
+    }
+  }
+  if (lowerTitle.includes('web developer') || lowerTitle.includes('software developer') || lowerTitle.includes('java developer')) {
+    return {
+      icon: Code,
+      gradient: 'from-blue-500 to-purple-600',
+      bgColor: 'bg-gradient-to-br from-blue-500 to-purple-600'
+    }
+  }
+  
+  // Software Engineer
+  if (lowerTitle.includes('software engineer')) {
+    return {
+      icon: Code,
+      gradient: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-gradient-to-br from-blue-500 to-cyan-500'
+    }
+  }
+  
+  // Database Administrator
+  if (lowerTitle.includes('database') || lowerTitle.includes('dba')) {
+    return {
+      icon: Database,
+      gradient: 'from-cyan-400 to-blue-500',
+      bgColor: 'bg-gradient-to-br from-cyan-400 to-blue-500'
+    }
+  }
+  
+  // Security roles
+  if (lowerTitle.includes('security') || lowerTitle.includes('network')) {
+    return {
+      icon: Zap,
+      gradient: 'from-red-500 to-orange-600',
+      bgColor: 'bg-gradient-to-br from-red-500 to-orange-600'
+    }
+  }
+  
+  // Default
+  return {
+    icon: Briefcase,
+    gradient: 'from-blue-400 to-cyan-400',
+    bgColor: 'bg-gradient-to-br from-blue-400 to-cyan-400'
+  }
+}
 
 export default function MyJobsPage() {
   const router = useRouter()
@@ -153,15 +248,21 @@ export default function MyJobsPage() {
                 }}
                 className="bg-white rounded-3xl shadow-xl overflow-hidden border-2 border-blue-100 cursor-pointer max-w-sm mx-auto w-full"
               >
-                {/* Header with logo - smaller */}
-                <div className="relative h-32 bg-gradient-to-br from-blue-400 to-cyan-400 flex items-center justify-center pt-4">
-                  <div className="text-6xl">💼</div>
-                  <div className="absolute top-4 right-4">
-                    <div className="p-2 bg-green-500 rounded-full shadow-lg">
-                      <Heart className="w-4 h-4 text-white fill-white" />
+                {/* Dynamic Header based on job title */}
+                {(() => {
+                  const theme = getJobTheme(job.title)
+                  const Icon = theme.icon
+                  return (
+                    <div className={`relative h-32 ${theme.bgColor} flex items-center justify-center pt-4`}>
+                      <Icon className="w-16 h-16 text-white opacity-90" />
+                      <div className="absolute top-4 right-4">
+                        <div className="p-2 bg-green-500 rounded-full shadow-lg">
+                          <Heart className="w-4 h-4 text-white fill-white" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  )
+                })()}
                 
                 {/* Essential Information */}
                 <div className="p-6 flex flex-col">

@@ -47,6 +47,16 @@ export async function saveInteraction(interaction: {
   return response.json();
 }
 
+export async function getUserInteractions(userId: number): Promise<{ liked: string[], passed: string[] }> {
+  const response = await fetch(`${API_URL}/api/interactions/${userId}`);
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch user interactions');
+  }
+  
+  return response.json();
+}
+
 export async function getLikedJobs(userId: number) {
   const response = await fetch(`${API_URL}/api/liked-jobs/${userId}`);
   
@@ -58,7 +68,7 @@ export async function getLikedJobs(userId: number) {
 }
 
 export async function getUserProfile(userId: number) {
-  const response = await fetch(`${API_URL}/auth/api/users/${userId}`);
+  const response = await fetch(`${API_URL}/auth/users/${userId}`);
   
   if (!response.ok) {
     throw new Error('Failed to fetch user profile');

@@ -28,6 +28,25 @@ def create_interaction(interaction: InteractionCreate, db: Session = Depends(get
     db.refresh(db_interaction)
     return {"status": "success", "id": db_interaction.id}
 
+@router.get("/api/interactions/{user_id}")
+def get_user_interactions(user_id: int, db: Session = Depends(get_db)):
+    """
+    Get all interactions for a user (both likes and passes).
+    Returns: { "liked": ["job1", "job2"], "passed": ["job3", "job4"] }
+    """
+    interactions = db.query(Interaction).filter(
+        Interaction.user_id == user_id,
+        Interaction.type == "job"
+    ).all()
+    
+    liked = [i.item_id for i in interactions if i.action == "like"]
+    passed = [i.item_id for i in interactions if i.action == "pass"]
+    
+    return {
+        "liked": liked,
+        "passed": passed
+    }
+
 @router.get("/api/liked-jobs/{user_id}")
 def get_liked_jobs(user_id: int, db: Session = Depends(get_db)):
     # 1. Get liked job IDs from interactions

@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth'
 import { mockCandidates, mockJobOffers, Candidate, JobOffer } from '@/lib/data'
 import { getLikedItems, getPassedItems } from '@/lib/swipes'
-import { getRecommendations } from '@/lib/api'
+import { getRecommendations, getUserInteractions } from '@/lib/api'
 
 export function useRecommendations() {
   const router = useRouter()
@@ -83,9 +83,22 @@ export function useRecommendations() {
                  };
                })
 
-               // Filter out already swiped items
-               const liked = getLikedItems(user.id, 'job')
-               const passed = getPassedItems(user.id, 'job')
+               // Filter out already swiped items - use backend interactions
+               let liked: string[] = []
+               let passed: string[] = []
+               
+               try {
+                 const interactions = await getUserInteractions(parseInt(userId))
+                 liked = interactions.liked
+                 passed = interactions.passed
+                 console.log(`Backend interactions: ${liked.length} liked, ${passed.length} passed`)
+               } catch (e) {
+                 console.warn("Failed to fetch backend interactions, falling back to localStorage", e)
+                 // Fallback to localStorage if backend fails
+                 liked = getLikedItems(user.id, 'job')
+                 passed = getPassedItems(user.id, 'job')
+               }
+               
                const filteredJobs = adaptedJobs.filter(
                  job => !liked.includes(job.id) && !passed.includes(job.id)
                )

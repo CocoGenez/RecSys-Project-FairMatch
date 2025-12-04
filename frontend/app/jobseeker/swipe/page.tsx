@@ -67,8 +67,8 @@ export default function JobseekerSwipePage() {
   }
 
   return (
-    <div className="min-h-screen p-4 pb-24">
-      <div className="max-w-md mx-auto">
+    <div className="min-h-screen p-4 flex flex-col">
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -110,8 +110,8 @@ export default function JobseekerSwipePage() {
           </div>
         </motion.div>
 
-        {/* Zone de swipe */}
-        <div className="relative h-[600px] mb-6 flex items-center justify-center">
+        {/* Swipe Zone - Full height with side buttons */}
+        <div className="flex-1 relative flex items-center justify-center min-h-0">
           {adaptedCurrentJobs.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
@@ -135,47 +135,50 @@ export default function JobseekerSwipePage() {
               </div>
             </motion.div>
           ) : (
-            <AnimatePresence>
-              {adaptedCurrentJobs.map((job, index) => (
-                <JobSwipeCard
-                  key={job.id}
-                  job={job}
-                  onSwipe={handleSwipe}
-                  onJobClick={handleJobClick}
-                  index={index}
-                />
-              ))}
-            </AnimatePresence>
+            <>
+              {/* Pass Button - Left Side */}
+              {adaptedCurrentJobs.length > 0 && (
+                <motion.button
+                  whileHover={{ scale: 1.2, rotate: -15 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handleSwipe('left')}
+                  disabled={isAnimating}
+                  className="absolute -left-10 z-20 w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-red-200 hover:border-red-400 transition-colors disabled:opacity-50 hover:bg-red-50"
+                  title="Pass"
+                >
+                  <X className="w-7 h-7 text-red-500" />
+                </motion.button>
+              )}
+
+              {/* Job Cards */}
+              <AnimatePresence>
+                {adaptedCurrentJobs.map((job, index) => (
+                  <JobSwipeCard
+                    key={job.id}
+                    job={job}
+                    onSwipe={handleSwipe}
+                    onJobClick={handleJobClick}
+                    index={index}
+                  />
+                ))}
+              </AnimatePresence>
+
+              {/* Like Button - Right Side */}
+              {adaptedCurrentJobs.length > 0 && (
+                <motion.button
+                  whileHover={{ scale: 1.2, rotate: 15 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleSwipe('right')}
+                  disabled={isAnimating}
+                  className="absolute -right-10 z-20 w-14 h-14 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-green-200 hover:border-green-400 transition-colors disabled:opacity-50 hover:bg-green-50"
+                  title="Like"
+                >
+                  <Heart className="w-7 h-7 text-green-500 fill-green-500" />
+                </motion.button>
+              )}
+            </>
           )}
         </div>
-
-        {/* Boutons d'action */}
-        {adaptedCurrentJobs.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex justify-center gap-6"
-          >
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: -10 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => handleSwipe('left')}
-              disabled={isAnimating}
-              className="w-16 h-16 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-red-200 hover:border-red-400 transition-colors disabled:opacity-50"
-            >
-              <X className="w-8 h-8 text-red-500" />
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.1, rotate: 10 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleSwipe('right')}
-              disabled={isAnimating}
-              className="w-16 h-16 bg-white rounded-full shadow-xl flex items-center justify-center border-2 border-green-200 hover:border-green-400 transition-colors disabled:opacity-50"
-            >
-              <Heart className="w-8 h-8 text-green-500 fill-green-500" />
-            </motion.button>
-          </motion.div>
-        )}
       </div>
 
       {/* Modal Job */}

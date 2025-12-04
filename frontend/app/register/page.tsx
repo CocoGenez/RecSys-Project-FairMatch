@@ -147,25 +147,17 @@ export default function RegisterPage() {
                 Je suis un(e)...
               </label>
               <div className="grid grid-cols-2 gap-4">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setRole('recruiter')}
-                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    role === 'recruiter'
-                      ? 'border-purple-500 bg-purple-50'
-                      : 'border-gray-200 hover:border-purple-200'
-                  }`}
+                <div
+                  className="p-4 rounded-xl border-2 border-gray-200 bg-gray-50 opacity-50 cursor-not-allowed relative"
                 >
-                  <Briefcase className={`w-6 h-6 mx-auto mb-2 ${
-                    role === 'recruiter' ? 'text-purple-600' : 'text-gray-400'
-                  }`} />
-                  <p className={`text-sm font-semibold text-center ${
-                    role === 'recruiter' ? 'text-purple-600' : 'text-gray-600'
-                  }`}>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-semibold">En développement</span>
+                  </div>
+                  <Briefcase className="w-6 h-6 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm font-semibold text-center text-gray-400">
                     Recruteur
                   </p>
-                </motion.div>
+                </div>
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

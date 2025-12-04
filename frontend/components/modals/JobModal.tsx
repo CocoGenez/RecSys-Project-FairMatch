@@ -61,7 +61,7 @@ export default function JobModal({ job, isOpen, onClose }: JobModalProps) {
                     <li><span className="font-medium">Role:</span> {job.role || 'Not specified'}</li>
                     <li><span className="font-medium">Type:</span> {job.workType || 'Not specified'}</li>
                     <li><span className="font-medium">Experience:</span> {job.experience || 'Not specified'}</li>
-                    <li><span className="font-medium">Salary:</span> {job.salaryRange || 'Not specified'}</li>
+                    <li><span className="font-medium">Salary Range:</span> {job.salaryRange || 'Not specified'}</li>
                   </ul>
                 </div>
                 <div className="bg-blue-50 p-4 rounded-xl">

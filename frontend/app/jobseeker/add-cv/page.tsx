@@ -36,12 +36,9 @@ export default function AddCVPage() {
       if (user) {
         // 1. Try loading from backend (Registration data)
         try {
-          // Check if we have a backendId stored in localStorage (from registration)
-          const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-          const backendId = storedUser.backendId || (user as any).backendId;
-
-          if (backendId) {
-            const profile = await getUserProfile(parseInt(backendId));
+          // The user.id is already the database ID
+          if (user.id) {
+            const profile = await getUserProfile(parseInt(user.id));
             console.log("Loaded profile from backend:", profile);
             
             // Map backend profile to form data
@@ -59,7 +56,6 @@ export default function AddCVPage() {
               gender: profile.gender || prev.gender,
               futureCareer: profile.future_career || prev.futureCareer,
               skills: [
-                ...(prev.skills || []),
                 profile.python_level ? `Python (${profile.python_level})` : null,
                 profile.sql_level ? `SQL (${profile.sql_level})` : null,
                 profile.java_level ? `Java (${profile.java_level})` : null
@@ -297,14 +293,15 @@ export default function AddCVPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
                   Localisation
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">En développement</span>
                 </label>
                 <input
                   type="text"
                   value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
+                  disabled
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                   placeholder="Ex: Paris, France"
                 />
               </div>
@@ -342,14 +339,15 @@ export default function AddCVPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
                   Photo
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">En développement</span>
                 </label>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={handlePhotoUpload}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
+                  disabled
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                 />
                 {formData.photo && (
                   <div className="mt-3">
@@ -402,45 +400,27 @@ export default function AddCVPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
+                className="bg-gray-50 rounded-3xl shadow-xl p-6 border border-gray-200 opacity-60"
               >
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Compétences</h2>
+                <h2 className="text-xl font-bold text-gray-400 mb-2 flex items-center gap-2">
+                  Compétences
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-normal">En développement</span>
+                </h2>
+                <p className="text-sm text-gray-500 mb-4">Les compétences sont remplies automatiquement à partir de votre CV.</p>
                 <div className="space-y-4">
                   <div>
                     <div className="flex gap-2">
                       <input
                         type="text"
                         value={currentSkill}
-                        onChange={(e) => setCurrentSkill(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault()
-                            if (currentSkill.trim() && !formData.skills.includes(currentSkill.trim())) {
-                              setFormData({
-                                ...formData,
-                                skills: [...formData.skills, currentSkill.trim()],
-                              })
-                              setCurrentSkill('')
-                            }
-                          }
-                        }}
-                        className="flex-1 px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
+                        disabled
+                        className="flex-1 px-4 py-2 rounded-xl border-2 border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                         placeholder="Ajoutez une compétence..."
                       />
                       <motion.button
                         type="button"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        onClick={() => {
-                          if (currentSkill.trim() && !formData.skills.includes(currentSkill.trim())) {
-                            setFormData({
-                              ...formData,
-                              skills: [...formData.skills, currentSkill.trim()],
-                            })
-                            setCurrentSkill('')
-                          }
-                        }}
-                        className="px-4 py-2 bg-purple-500 text-white rounded-xl font-semibold"
+                        disabled
+                        className="px-4 py-2 bg-gray-300 text-gray-500 rounded-xl font-semibold cursor-not-allowed"
                       >
                         <Plus className="w-5 h-5" />
                       </motion.button>
@@ -550,7 +530,7 @@ export default function AddCVPage() {
               className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <Save className="w-5 h-5" />
-              {loading ? 'Création...' : 'Créer mon profil'}
+              {loading ? 'Création...' : 'Enregistrer mon profil'}
             </motion.button>
           </motion.div>
         </form>
