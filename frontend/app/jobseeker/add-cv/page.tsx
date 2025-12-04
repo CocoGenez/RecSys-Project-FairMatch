@@ -112,7 +112,7 @@ export default function AddCVPage() {
       }
       reader.readAsDataURL(file)
     } else {
-      alert('Veuillez sélectionner un fichier image (JPG, PNG, etc.)')
+      alert('Please select an image file (JPG, PNG, etc.)')
     }
   }
 
@@ -121,22 +121,22 @@ export default function AddCVPage() {
     setError('')
 
     if (!user || user.role !== 'jobseeker') {
-      setError('Vous devez être connecté en tant que candidat')
+      setError('You must be logged in as a candidate')
       return
     }
 
     if (!formData.firstName || !formData.lastName || !formData.email) {
-      setError('Veuillez remplir les informations personnelles')
+      setError('Please fill in your personal information')
       return
     }
 
     if (cvType === 'pdf' && !formData.cvPdfUrl) {
-      setError('Veuillez importer un CV PDF')
+      setError('Please upload a PDF resume')
       return
     }
 
     if (cvType === 'form' && formData.skills.length === 0) {
-      setError('Veuillez ajouter au moins une compétence')
+      setError('Please add at least one skill')
       return
     }
 
@@ -204,7 +204,7 @@ export default function AddCVPage() {
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </motion.button>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Ajouter mon CV
+            Add my CV
           </h1>
         </motion.div>
 
@@ -215,7 +215,7 @@ export default function AddCVPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Type de CV</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">CV type</h2>
             <div className="grid grid-cols-2 gap-4">
               <motion.button
                 type="button"
@@ -229,7 +229,7 @@ export default function AddCVPage() {
                 }`}
               >
                 <FileText className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-                <p className="font-semibold">Importer un PDF</p>
+                <p className="font-semibold">Import a PDF</p>
               </motion.button>
               <motion.button
                 type="button"
@@ -243,22 +243,21 @@ export default function AddCVPage() {
                 }`}
               >
                 <User className="w-8 h-8 mx-auto mb-2 text-purple-600" />
-                <p className="font-semibold">Remplir un formulaire</p>
+                <p className="font-semibold">Fill out a form</p>
               </motion.button>
             </div>
           </motion.div>
 
-          {/* Informations personnelles - toujours affichées */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-4">Informations personnelles</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Personal Information</h2>
             <div className="grid md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Prénom <span className="text-red-500">*</span>
+                  First Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -270,7 +269,7 @@ export default function AddCVPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom <span className="text-red-500">*</span>
+                  Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -294,8 +293,8 @@ export default function AddCVPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
-                  Localisation
-                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">En développement</span>
+                  Location
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">In development</span>
                 </label>
                 <input
                   type="text"
@@ -318,7 +317,7 @@ export default function AddCVPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Genre
+                  Gender
                 </label>
                 <input
                   type="text"
@@ -329,7 +328,7 @@ export default function AddCVPage() {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Carrière visée
+                  Targeted Career
                 </label>
                 <input
                   type="text"
@@ -341,7 +340,7 @@ export default function AddCVPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2 flex items-center gap-2">
                   Photo
-                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">En développement</span>
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">In development</span>
                 </label>
                 <input
                   type="file"
@@ -356,14 +355,14 @@ export default function AddCVPage() {
                       alt="Aperçu"
                       className="w-24 h-24 rounded-full object-cover border-2 border-purple-200"
                     />
-                    <p className="text-xs text-green-600 mt-2">✓ Photo importée avec succès</p>
+                    <p className="text-xs text-green-600 mt-2">✓ Photo successfully uploaded</p>
                   </div>
                 )}
               </div>
             </div>
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                À propos / Domaine d'intérêt
+                About / Area of Interest
               </label>
               <textarea
                 value={formData.bio}
@@ -382,7 +381,7 @@ export default function AddCVPage() {
               transition={{ delay: 0.1 }}
               className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
             >
-              <h2 className="text-xl font-bold text-gray-800 mb-4">Importer votre CV</h2>
+              <h2 className="text-xl font-bold text-gray-800 mb-4">Import your CV</h2>
               <input
                 type="file"
                 accept=".pdf"
@@ -390,7 +389,7 @@ export default function AddCVPage() {
                 className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-all"
               />
               {formData.cvPdfUrl && (
-                <p className="mt-4 text-green-600 font-semibold">✓ CV importé avec succès</p>
+                <p className="mt-4 text-green-600 font-semibold">✓ CV successfully imported</p>
               )}
             </motion.div>
           ) : (
@@ -403,10 +402,10 @@ export default function AddCVPage() {
                 className="bg-gray-50 rounded-3xl shadow-xl p-6 border border-gray-200 opacity-60"
               >
                 <h2 className="text-xl font-bold text-gray-400 mb-2 flex items-center gap-2">
-                  Compétences
-                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-normal">En développement</span>
+                  Skills
+                  <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-normal">In development</span>
                 </h2>
-                <p className="text-sm text-gray-500 mb-4">Les compétences sont remplies automatiquement à partir de votre CV.</p>
+                <p className="text-sm text-gray-500 mb-4">Skills are automatically filled in from your resume</p>
                 <div className="space-y-4">
                   <div>
                     <div className="flex gap-2">
@@ -458,7 +457,7 @@ export default function AddCVPage() {
                 transition={{ delay: 0.2 }}
                 className="bg-white rounded-3xl shadow-xl p-6 border border-purple-100"
               >
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Projets</h2>
+                <h2 className="text-xl font-bold text-gray-800 mb-4">Projects</h2>
                 <div className="space-y-2">
                   {formData.projects.map((project, index) => (
                     <div key={index} className="flex gap-2">
@@ -490,7 +489,7 @@ export default function AddCVPage() {
                     className="mt-2 px-4 py-2 bg-purple-100 text-purple-700 rounded-xl font-semibold flex items-center gap-2 hover:bg-purple-200 transition-colors"
                   >
                     <Plus className="w-4 h-4" />
-                    Ajouter un projet
+                    Add a project
                   </button>
                 </div>
               </motion.div>

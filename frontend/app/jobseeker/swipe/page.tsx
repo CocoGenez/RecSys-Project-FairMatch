@@ -49,7 +49,7 @@ export default function JobseekerSwipePage() {
     company: item.company,
     location: item.location,
     objectives: item.description, // Map description to objectives
-    startDate: 'Dès que possible',
+    startDate: 'As soon as possible',
     requiredQualities: item.requiredSkills || [], // Map skills to qualities
     descriptionType: 'text',
     description: item.description,

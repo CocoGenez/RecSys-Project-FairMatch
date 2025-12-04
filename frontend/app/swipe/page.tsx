@@ -55,7 +55,7 @@ export default function SwipePage() {
           className="flex items-center justify-between mb-6"
         >
           <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            {user.role === 'recruiter' ? 'Trouvez des candidats' : 'Trouvez votre job'}
+            {user.role === 'recruiter' ? 'Find candidates' : 'Find jobs'}
           </h1>
           <div className="flex gap-2">
             <motion.button
@@ -87,9 +87,9 @@ export default function SwipePage() {
             >
               <div className="text-center p-8">
                 <div className="text-6xl mb-4 animate-bounce">🔄</div>
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">Chargement...</h2>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">Loading...</h2>
                 <p className="text-gray-600">
-                  Recherche de nouvelles recommandations...
+                  Searching for new recommendations...
                 </p>
               </div>
             </motion.div>
@@ -103,11 +103,7 @@ export default function SwipePage() {
                 <div className="text-6xl mb-4">🎉</div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">No more profiles!</h2>
                 <p className="text-gray-600 mb-6">
-<<<<<<< HEAD
                   You have viewed all available profiles.  
-=======
-                  Vous avez vu cette série de profils.
->>>>>>> 667545c834520350fe40d50a05cce0b9293a0bc8
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -115,11 +111,7 @@ export default function SwipePage() {
                   onClick={() => refresh()}
                   className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl font-semibold shadow-lg"
                 >
-<<<<<<< HEAD
                   View my selections
-=======
-                  Réessayer
->>>>>>> 667545c834520350fe40d50a05cce0b9293a0bc8
                 </motion.button>
               </div>
             </motion.div>
