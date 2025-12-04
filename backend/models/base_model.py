@@ -7,12 +7,42 @@ from pathlib import Path
 root = Path(__file__).parent
 processed_dir = root.parent / "Processed"
 
+class RecSysClassifier(torch.nn.Module):
+    def __init__(self, input_dim=768, hidden_dim=128):
+        super(RecSysClassifier, self).__init__()
+        self.fc1 = torch.nn.Linear(input_dim, hidden_dim)
+        self.relu = torch.nn.ReLU()
+        self.dropout = torch.nn.Dropout(0.2)
+        self.fc2 = torch.nn.Linear(hidden_dim, 64)
+        self.fc3 = torch.nn.Linear(64, 1)
+        self.sigmoid = torch.nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        x = self.fc2(x)
+        x = self.relu(x)
+        x = self.fc3(x)
+        return self.sigmoid(x)
+
 # Charger les artefacts déjà calculés
 # On utilise try/except pour éviter que ça plante si les fichiers n'existent pas encore (dev mode)
 try:
     # user_emb = torch.load(processed_dir / "user_embeddings.pt")      # (180, 384) - Pas nécessaire pour les nouveaux users
     job_emb  = torch.load(processed_dir / "job_embeddings.pt")       # (N_jobs, 384)
-    jobs     = pd.read_parquet(processed_dir / "jobs_sample.parquet")
+    jobs     = pd.read_parquet(processed_dir / "jobs.parquet")
+    
+    # Load classifier
+    classifier = RecSysClassifier()
+    classifier_path = root / "classifier.pt"
+    if classifier_path.exists():
+        classifier.load_state_dict(torch.load(classifier_path))
+        classifier.eval()
+        print("Classifier loaded successfully.")
+    else:
+        print("Warning: classifier.pt not found. Using fallback.")
+        classifier = None
 
     print("Models loaded successfully.")
     if job_emb is not None:
@@ -24,6 +54,7 @@ except Exception as e:
     print(f"WARNING: Could not load model artifacts: {e}")
     job_emb = None
     jobs = None
+    classifier = None
 
 # Charger le modèle de sentence embedding pour les nouveaux users
 try:
@@ -44,58 +75,22 @@ def split_skills(val):
     val = val.strip()
     if not val:
         return []
-
-    skills = []
-    current = []
-    paren_depth = 0
-    s = val
-    length = len(s)
-
-    for i, ch in enumerate(s):
-        # update parentheses depth
-        if ch == '(':
-            paren_depth += 1
-            current.append(ch)
-            continue
-        if ch == ')':
-            paren_depth = max(0, paren_depth - 1)
-            current.append(ch)
-            continue
-
-        # If comma and we're NOT inside parentheses, treat as separator
-        if ch == ',' and paren_depth == 0:
-            token = ''.join(current).strip()
-            if token:
-                skills.append(token)
-            current = []
-            continue
-
-        # Boundary split: space where previous char is lowercase or ')' and next is Uppercase
-        # Only split when not inside parentheses
-        if (
-            ch == ' ' and paren_depth == 0 and
-            i + 1 < length and
-            i - 1 >= 0 and
-            (s[i - 1].islower() or s[i - 1] == ')') and
-            s[i + 1].isupper()
-        ):
-            token = ''.join(current).strip()
-            if token:
-                skills.append(token)
-            current = []
-            # do not include the boundary space
-            continue
-
-        current.append(ch)
-
-    # append last token
-    last = ''.join(current).strip()
-    if last:
-        skills.append(last)
-
-    # final cleanup: strip and remove empty entries
-    final = [t.strip() for t in skills if t and t.strip()]
-    return final
+        
+    # 1. Try splitting by the specific pattern: lowercase/paren + space + Uppercase
+    # This handles the "merged sentences" issue (e.g. "development Security")
+    # Regex: Lookbehind for [a-z)] followed by space(s) followed by Lookahead for [A-Z]
+    parts = re.split(r'(?<=[a-z)])\s+(?=[A-Z])', val)
+    
+    final_skills = []
+    for p in parts:
+        # 2. For each part, also split by comma if present
+        if "," in p:
+            subs = [s.strip() for s in p.split(",") if s.strip()]
+            final_skills.extend(subs)
+        else:
+            final_skills.append(p.strip())
+            
+    return final_skills
 
 
 def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
@@ -110,16 +105,35 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
     # convert_to_tensor=True renvoie un tensor sur CPU ou GPU selon dispo
     u_emb = model.encode(profile_text, convert_to_tensor=True) # (384,)
 
-    # 2) Scores de similarité cosinus
-    # util.cos_sim attend (N, D) et (M, D) -> renvoie (N, M)
-    scores = util.cos_sim(u_emb.unsqueeze(0), job_emb)[0]  # (N_jobs,)
+    scores = None
+    
+    # 2) Predict scores using Classifier if available
+    if classifier is not None:
+        try:
+            # Expand u_emb to match job_emb size
+            # u_emb: (384,) -> (N, 384)
+            u_emb_expanded = u_emb.unsqueeze(0).expand(job_emb.size(0), -1)
+            
+            # Concatenate (N, 768)
+            inputs = torch.cat((u_emb_expanded, job_emb), dim=1)
+            
+            with torch.no_grad():
+                scores = classifier(inputs).squeeze() # (N,)
+        except Exception as e:
+            print(f"Classifier prediction failed: {e}. Fallback to cosine similarity.")
+            scores = None
+
+    # Fallback: Cosine Similarity
+    if scores is None:
+        # util.cos_sim attend (N, D) et (M, D) -> renvoie (N, M)
+        scores = util.cos_sim(u_emb.unsqueeze(0), job_emb)[0]  # (N_jobs,)
 
     # 3) Top-k indices
     top_idx = torch.topk(scores, k=top_k).indices.cpu().tolist()
 
     # 4) Récupérer les jobs
     cols = []
-    for c in ["jobid", "job title", "role", "skills", "company", "companybucket", "location", "salary range", "job description"]:
+    for c in ["jobid", "job title", "role", "skills", "company", "companybucket", "location", "salary_range", "job description"]:
         if c in jobs.columns:
             cols.append(c)
     
@@ -147,7 +161,7 @@ def recommend_from_text(profile_text: str, top_k: int = 5) -> list:
             "location": row.get("location", "Remote"),
             "country": row.get("country", "Unknown Country"),
             "skills": split_skills(row.get("skills", "")),
-            "salary_range": row.get("salary range", "Competitive"),
+            "salary_range": row.get("salary_range", "Competitive"),
             "experience": row.get("experience", "Not specified"),
             "qualifications": row.get("qualifications", "Not specified"),
             "work_type": row.get("work type", "Full-time"),
@@ -208,7 +222,7 @@ def get_job_details(job_ids: list) -> list:
             "location": row.get("location", "Remote"),
             "country": row.get("country", "Unknown Country"),
             "skills": split_skills(row.get("skills", "")),
-            "salary_range": row.get("salary range", "Competitive"),
+            "salary_range": row.get("salary_range", "Competitive"),
             "experience": row.get("experience", "Not specified"),
             "qualifications": row.get("qualifications", "Not specified"),
             "work_type": row.get("work type", "Full-time"),
